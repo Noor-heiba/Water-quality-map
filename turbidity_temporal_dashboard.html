@@ -1,0 +1,194 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Turbidity: Satellite vs EPA — Temporal Match</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: Arial, sans-serif; background: #f0f4f8; padding: 20px; }
+        h1 { text-align: center; color: #1a1a2e; margin-bottom: 5px; font-size: 20px; }
+        .subtitle { text-align: center; color: gray; margin-bottom: 20px; font-size: 12px; }
+        .stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
+        .stat { background: white; border-radius: 10px; padding: 12px; text-align: center; box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
+        .stat-value { font-size: 22px; font-weight: bold; }
+        .stat-label { font-size: 11px; color: gray; margin-top: 4px; }
+        .main-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
+        .card { background: white; border-radius: 10px; padding: 15px; box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
+        h3 { font-size: 13px; color: #333; margin-bottom: 12px; border-bottom: 1px solid #eee; padding-bottom: 6px; }
+        #map { height: 400px; border-radius: 8px; }
+        .legend { background: white; padding: 10px; border-radius: 6px; font-size: 12px; line-height: 1.8; }
+        .finding { background: #fff8e1; border-left: 4px solid #ffc107; padding: 10px; 
+                   border-radius: 5px; font-size: 12px; margin-top: 10px; line-height: 1.6; }
+        .finding b { color: #e65100; }
+    </style>
+</head>
+<body>
+    <h1>🛰️ Satellite vs EPA Turbidity — Temporal Match Analysis</h1>
+    <p class="subtitle">Each satellite reading matched within 14 days of EPA measurement · 50m spatial buffer · 20 California sites (2023)</p>
+
+    <div class="stat-grid">
+        <div class="stat">
+            <div class="stat-value" style="color:#4285F4">20</div>
+            <div class="stat-label">Matched Sites</div>
+        </div>
+        <div class="stat">
+            <div class="stat-value" style="color:red">0.019</div>
+            <div class="stat-label">Correlation</div>
+        </div>
+        <div class="stat">
+            <div class="stat-value" style="color:#4285F4">14 days</div>
+            <div class="stat-label">Max Time Gap</div>
+        </div>
+        <div class="stat">
+            <div class="stat-value" style="color:#4285F4">50m</div>
+            <div class="stat-label">Spatial Buffer</div>
+        </div>
+    </div>
+
+    <div class="main-grid">
+        <div class="card">
+            <h3>📊 Scatter Plot: Satellite NDTI vs EPA Turbidity</h3>
+            <canvas id="scatterChart" height="300"></canvas>
+            <div class="finding">
+                <b>Finding:</b> Correlation of 0.019 — essentially no relationship. 
+                The NDTI formula cannot detect turbidity differences at these 
+                algae-dominated California lake sites. EPA ground measurements 
+                remain the most reliable source for turbidity data.
+            </div>
+        </div>
+        <div class="card">
+            <h3>🗺️ Site Locations — EPA (blue) vs Satellite Match (orange)</h3>
+            <div id="map"></div>
+            <div class="finding">
+                <b>Note:</b> Blue dots = EPA measurement locations. 
+                Orange dots = same locations where satellite was sampled within 14 days.
+                Points overlap because both use the exact same coordinates.
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3>📈 EPA Turbidity vs Satellite NDTI by Site</h3>
+        <canvas id="barChart" height="120"></canvas>
+    </div>
+
+<script>
+var scatterData = [{"x": -0.2196879868625832, "y": 12.5, "date": "2023-09-20", "n": 9}, {"x": -0.2246115577834505, "y": 1.08, "date": "2023-10-18", "n": 13}, {"x": -0.2208797205106566, "y": 40.0, "date": "2023-10-04", "n": 6}, {"x": -0.1100637558659534, "y": 50.7, "date": "2023-11-07", "n": 8}, {"x": -0.2387176446931813, "y": 24.3, "date": "2023-09-20", "n": 9}, {"x": 0.0183632749708079, "y": 38.7, "date": "2023-12-11", "n": 4}, {"x": 0.0371649726656523, "y": 1.7, "date": "2023-04-19", "n": 9}, {"x": -0.097670948908995, "y": 17.3, "date": "2023-10-16", "n": 7}, {"x": -0.2097031041603146, "y": 80.3, "date": "2023-10-16", "n": 7}, {"x": -0.1300368946770012, "y": 317.3, "date": "2023-09-20", "n": 9}, {"x": -0.2824935896984348, "y": 1.022, "date": "2023-07-24", "n": 1}, {"x": -0.1623626404269429, "y": 97.35, "date": "2023-04-17", "n": 6}, {"x": 0.0929040130655239, "y": 55.0, "date": "2023-08-31", "n": 8}, {"x": -0.0964083410863509, "y": 42.1, "date": "2023-10-04", "n": 6}, {"x": 0.1529377731955993, "y": 76.7, "date": "2023-10-04", "n": 6}, {"x": 0.0899154174200548, "y": 20.4, "date": "2023-08-08", "n": 8}, {"x": -0.0238567376115979, "y": 12.8, "date": "2023-10-16", "n": 7}, {"x": -0.2416889606856352, "y": 5.85, "date": "2023-05-23", "n": 5}, {"x": -0.1314243477828974, "y": 64.9, "date": "2023-10-04", "n": 6}, {"x": -0.0263725286175682, "y": 0.812, "date": "2023-07-24", "n": 1}];
+var mapPoints = [{"lat": 39.0119, "lon": -122.7605, "epa": 12.5, "ndti": -0.2196879868625832, "date": "2023-09-20"}, {"lat": 41.5175, "lon": -124.02330000000002, "epa": 1.08, "ndti": -0.2246115577834505, "date": "2023-10-18"}, {"lat": 38.9598, "lon": -122.6503, "epa": 40.0, "ndti": -0.2208797205106566, "date": "2023-10-04"}, {"lat": 39.0094, "lon": -122.67380000000001, "epa": 50.7, "ndti": -0.1100637558659534, "date": "2023-11-07"}, {"lat": 38.9498, "lon": -122.65939999999999, "epa": 24.3, "ndti": -0.2387176446931813, "date": "2023-09-20"}, {"lat": 39.1213, "lon": -122.8555, "epa": 38.7, "ndti": 0.0183632749708079, "date": "2023-12-11"}, {"lat": 33.99079999999999, "lon": -116.8426, "epa": 1.7, "ndti": 0.0371649726656523, "date": "2023-04-19"}, {"lat": 39.0119, "lon": -122.7605, "epa": 17.3, "ndti": -0.097670948908995, "date": "2023-10-16"}, {"lat": 38.9598, "lon": -122.6503, "epa": 80.3, "ndti": -0.2097031041603146, "date": "2023-10-16"}, {"lat": 39.001000000000005, "lon": -122.7507, "epa": 317.3, "ndti": -0.1300368946770012, "date": "2023-09-20"}, {"lat": 37.80680000000001, "lon": -122.26099999999998, "epa": 1.022, "ndti": -0.2824935896984348, "date": "2023-07-24"}, {"lat": 41.5175, "lon": -124.02330000000002, "epa": 97.35, "ndti": -0.1623626404269429, "date": "2023-04-17"}, {"lat": 32.7349, "lon": -114.65670000000003, "epa": 55.0, "ndti": 0.0929040130655239, "date": "2023-08-31"}, {"lat": 39.001000000000005, "lon": -122.7507, "epa": 42.1, "ndti": -0.0964083410863509, "date": "2023-10-04"}, {"lat": 38.9999, "lon": -122.6172, "epa": 76.7, "ndti": 0.1529377731955993, "date": "2023-10-04"}, {"lat": 33.99079999999999, "lon": -116.8426, "epa": 20.4, "ndti": 0.0899154174200548, "date": "2023-08-08"}, {"lat": 38.9255, "lon": -122.61659999999999, "epa": 12.8, "ndti": -0.0238567376115979, "date": "2023-10-16"}, {"lat": 33.7186, "lon": -116.1844, "epa": 5.85, "ndti": -0.2416889606856352, "date": "2023-05-23"}, {"lat": 39.0193, "lon": -122.67509999999999, "epa": 64.9, "ndti": -0.1314243477828974, "date": "2023-10-04"}, {"lat": 37.8071, "lon": -122.25600000000004, "epa": 0.812, "ndti": -0.0263725286175682, "date": "2023-07-24"}];
+var dates = ["2023-09-20", "2023-10-18", "2023-10-04", "2023-11-07", "2023-09-20", "2023-12-11", "2023-04-19", "2023-10-16", "2023-10-16", "2023-09-20", "2023-07-24", "2023-04-17", "2023-08-31", "2023-10-04", "2023-10-04", "2023-08-08", "2023-10-16", "2023-05-23", "2023-10-04", "2023-07-24"];
+var epaVals = [12.5, 1.08, 40.0, 50.7, 24.3, 38.7, 1.7, 17.3, 80.3, 317.3, 1.022, 97.35, 55.0, 42.1, 76.7, 20.4, 12.8, 5.85, 64.9, 0.812];
+var ndtiVals = [-0.2196879868625832, -0.2246115577834505, -0.2208797205106566, -0.1100637558659534, -0.2387176446931813, 0.0183632749708079, 0.0371649726656523, -0.097670948908995, -0.2097031041603146, -0.1300368946770012, -0.2824935896984348, -0.1623626404269429, 0.0929040130655239, -0.0964083410863509, 0.1529377731955993, 0.0899154174200548, -0.0238567376115979, -0.2416889606856352, -0.1314243477828974, -0.0263725286175682];
+
+// Scatter chart
+var minX = Math.min(...scatterData.map(p=>p.x));
+var maxX = Math.max(...scatterData.map(p=>p.x));
+var slope = 10.426267570601178;
+var intercept = 49.09619970890876;
+var trendData = [{x: minX, y: slope*minX + intercept}, {x: maxX, y: slope*maxX + intercept}];
+
+new Chart(document.getElementById('scatterChart'), {
+    type: 'scatter',
+    data: { datasets: [
+        {
+            label: 'Sites',
+            data: scatterData.map(p => ({x: p.x, y: p.y})),
+            backgroundColor: 'rgba(66,133,244,0.6)',
+            pointRadius: 7
+        },
+        {
+            label: 'Trend',
+            data: trendData,
+            type: 'line',
+            borderColor: 'red',
+            borderDash: [5,5],
+            pointRadius: 0,
+            fill: false
+        }
+    ]},
+    options: {
+        plugins: { tooltip: { callbacks: { label: function(ctx) {
+            var p = scatterData[ctx.dataIndex];
+            return p ? p.date + ' | EPA: ' + p.y + ' NTU | NDTI: ' + p.x : '';
+        }}}},
+        scales: {
+            x: { title: { display: true, text: 'Satellite NDTI Index' }},
+            y: { title: { display: true, text: 'EPA Turbidity (NTU)' }}
+        }
+    }
+});
+
+// Bar chart
+new Chart(document.getElementById('barChart'), {
+    type: 'bar',
+    data: {
+        labels: dates,
+        datasets: [
+            {
+                label: 'EPA Turbidity (NTU)',
+                data: epaVals,
+                backgroundColor: 'rgba(66,133,244,0.7)',
+                yAxisID: 'y'
+            },
+            {
+                label: 'Satellite NDTI',
+                data: ndtiVals,
+                backgroundColor: 'rgba(234,67,53,0.7)',
+                yAxisID: 'y2'
+            }
+        ]
+    },
+    options: {
+        scales: {
+            x: { ticks: { maxRotation: 45, font: { size: 9 }}},
+            y: { position: 'left', title: { display: true, text: 'EPA Turbidity (NTU)' }},
+            y2: { position: 'right', title: { display: true, text: 'Satellite NDTI' }}
+        }
+    }
+});
+
+// Map
+var map = L.map('map').setView([37.5, -120.5], 6);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap'
+}).addTo(map);
+
+mapPoints.forEach(function(p) {
+    // EPA point (blue)
+    L.circleMarker([p.lat, p.lon], {
+        radius: 8, color: '#4285F4', fillColor: '#4285F4', 
+        fillOpacity: 0.7, weight: 2
+    }).addTo(map).bindPopup(
+        '<b>EPA Measurement</b><br>Date: ' + p.date + 
+        '<br>Turbidity: ' + p.epa + ' NTU'
+    );
+
+    // Satellite point (orange) - slightly offset so both visible
+    L.circleMarker([p.lat + 0.005, p.lon + 0.005], {
+        radius: 8, color: '#FF6D00', fillColor: '#FF6D00', 
+        fillOpacity: 0.7, weight: 2
+    }).addTo(map).bindPopup(
+        '<b>Satellite Sample</b><br>Date: within 14 days of ' + p.date + 
+        '<br>NDTI: ' + p.ndti.toFixed(4)
+    );
+});
+
+// Legend
+var legend = L.control({position: 'bottomright'});
+legend.onAdd = function() {
+    var div = L.DomUtil.create('div', 'legend');
+    div.style.background = 'white';
+    div.style.padding = '10px';
+    div.style.borderRadius = '6px';
+    div.style.fontSize = '12px';
+    div.innerHTML = '<b>Legend</b><br>' +
+        '<span style="color:#4285F4">●</span> EPA measurement<br>' +
+        '<span style="color:#FF6D00">●</span> Satellite sample';
+    return div;
+};
+legend.addTo(map);
+</script>
+</body>
+</html>
