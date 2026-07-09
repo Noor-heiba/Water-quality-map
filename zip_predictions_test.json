@@ -1,0 +1,82 @@
+{
+  "95112": {
+    "zip": "95112",
+    "lat": 37.3423335,
+    "lon": -121.8833812,
+    "source": "Blended (EPA 5.6km + ML)",
+    "nearest_epa_km": 5.6,
+    "predictions": {
+      "Specific_conductance": 710.13,
+      "Dissolved_oxygen_DO": 10.84,
+      "pH": 7.09,
+      "Turbidity": 28.32,
+      "Alkalinity_total": 88.97,
+      "Total_dissolved_solids": 343.77,
+      "Temperature_water": 15.92
+    }
+  },
+  "59001": {
+    "zip": "59001",
+    "lat": 45.6861837,
+    "lon": -109.8026683,
+    "source": "ML prediction only",
+    "nearest_epa_km": 79.0,
+    "predictions": {
+      "Specific_conductance": 362.06,
+      "Dissolved_oxygen_DO": 7.99,
+      "pH": 7.56,
+      "Turbidity": 39.99,
+      "Alkalinity_total": 78.01,
+      "Total_dissolved_solids": 247.68,
+      "Temperature_water": 16.22
+    }
+  },
+  "83801": {
+    "zip": "83801",
+    "lat": 47.8515503,
+    "lon": -116.7332182,
+    "source": "Blended (EPA 9.4km + ML)",
+    "nearest_epa_km": 9.4,
+    "predictions": {
+      "Specific_conductance": 165.54,
+      "Dissolved_oxygen_DO": 10.99,
+      "pH": 7.69,
+      "Turbidity": 15.13,
+      "Alkalinity_total": 75.73,
+      "Total_dissolved_solids": 131.99,
+      "Temperature_water": 14.43
+    }
+  },
+  "58001": {
+    "zip": "58001",
+    "lat": 46.448241,
+    "lon": -96.730015,
+    "source": "EPA (direct)",
+    "nearest_epa_km": 1.8,
+    "predictions": {
+      "Specific_conductance": 1674.39,
+      "Dissolved_oxygen_DO": 7.39,
+      "pH": 7.69,
+      "Turbidity": 41.54,
+      "Alkalinity_total": 247.65,
+      "Total_dissolved_solids": 708.66,
+      "Temperature_water": 19.33
+    }
+  },
+  "67001": {
+    "zip": "67001",
+    "lat": 37.7753899,
+    "lon": -97.6263494,
+    "source": "Blended (EPA 15.7km + ML)",
+    "nearest_epa_km": 15.7,
+    "predictions": {
+      "Specific_conductance": 656.52,
+      "Dissolved_oxygen_DO": 7.44,
+      "pH": 7.72,
+      "Turbidity": 32.66,
+      "Alkalinity_total": 155.0,
+      "Total_dissolved_solids": 494.23,
+      "Temperature_water": 18.55
+    }
+  }
+}
