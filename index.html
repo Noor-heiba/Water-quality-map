@@ -736,12 +736,6 @@ body{font-family:-apple-system,Arial,sans-serif;overflow:hidden;}
 
 <script>
 var points = [];
-fetch('national_full_map.json')
-.then(function(r){return r.json();})
-.then(function(data){
-    points = data;
-    loadMap();
-});
 var layerGroups = {};
 var map = L.map('map',{preferCanvas:true,zoomControl:true}).setView([39.5,-98.5],4);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:''}).addTo(map);
@@ -757,22 +751,8 @@ function getColor(val,param){
     return 'rgb('+Math.round(255*t)+',50,'+Math.round(255*(1-t))+')';
 }
 
-function loadMap(){
-var paramList=['ph','hardness','tds','turbidity','conductance','arsenic','iron','fluoride','manganese','nitrate','do','temp'];
-paramList.forEach(function(param){ layerGroups[param]=L.layerGroup(); });
 
-points.forEach(function(p){
-    paramList.forEach(function(param){
-        var color=getColor(p[param],param);
-        if(!color)return;
-        L.circleMarker([p.lat,p.lon],{radius:4,color:color,fillColor:color,fillOpacity:0.85,weight:0})
-        .bindPopup('<b>'+p.state+'</b><br>pH: '+p.ph+'<br>Turbidity: '+p.turbidity+' NTU<br>TDS: '+p.tds+' mg/L<br>Arsenic: '+p.arsenic+' mg/L<br>Iron: '+p.iron+' ug/L')
-        .addTo(layerGroups[param]);
-    });
 });
-
-layerGroups['ph'].addTo(map);
-}
 
 function toggleLayer(param,cb){
     if(cb.checked) layerGroups[param].addTo(map);
