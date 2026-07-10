@@ -1,28 +1,70 @@
 <!DOCTYPE html>
 <html>
-<head><title>Support - Water Quality App</title>
+<head>
+<title>Support - AquaIQ</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
-body{font-family:-apple-system,Arial,sans-serif;max-width:800px;margin:0 auto;padding:20px;color:#333;}
-h1{color:#1a1a2e;}h2{color:#4285F4;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#f0f4f8;}
+.header{background:linear-gradient(135deg,#1a1a2e,#34a853);padding:40px 20px;text-align:center;color:white;}
+.header h1{font-size:28px;font-weight:700;margin-bottom:8px;}
+.header p{font-size:14px;opacity:0.8;}
+.container{max-width:700px;margin:30px auto;padding:0 20px 40px;}
+.card{background:white;border-radius:16px;padding:24px;margin-bottom:16px;box-shadow:0 2px 12px rgba(0,0,0,0.08);}
+.card h2{font-size:16px;font-weight:700;color:#1a1a2e;margin-bottom:12px;}
+.card p{font-size:14px;color:#555;line-height:1.7;}
+.wqi-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;}
+.wqi-item{padding:10px;border-radius:10px;text-align:center;font-size:13px;font-weight:600;}
+.param-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;}
+.param-item{background:#f8f9fa;border-radius:8px;padding:10px;font-size:13px;color:#444;}
+.param-item b{color:#1a1a2e;display:block;margin-bottom:2px;}
+.footer{text-align:center;padding:20px;color:#888;font-size:12px;}
+a{color:#4285F4;}
 </style>
 </head>
 <body>
-<h1>Support</h1>
-<h2>How to Use</h2>
-<p>Enter any US ZIP code in the search bar to get water quality information for your area.</p>
-<h2>Understanding the Water Quality Index</h2>
-<p>The Water Quality Index (WQI) is calculated using the NSF formula based on pH, turbidity, TDS, hardness, dissolved oxygen, nitrate, fluoride, arsenic and temperature.</p>
-<ul>
-<li>90-100: Excellent</li>
-<li>70-89: Good</li>
-<li>50-69: Fair</li>
-<li>25-49: Poor</li>
-<li>0-24: Very Poor</li>
-</ul>
-<h2>Data Sources</h2>
-<p>Water quality data is sourced from the EPA Water Quality Portal with 38,979 monitoring locations across all 50 states.</p>
-<h2>Contact</h2>
-<p>Email: heibanoor81@gmail.com</p>
+<div class="header">
+    <h1>Support</h1>
+    <p>AquaIQ — US Water Quality App</p>
+</div>
+<div class="container">
+    <div class="card">
+        <h2>How to Use</h2>
+        <p>Enter any US ZIP code in the search bar to instantly get water quality information for your area. The app uses 38,979 EPA monitoring locations plus AI predictions for areas without direct measurements.</p>
+    </div>
+    <div class="card">
+        <h2>Water Quality Index (WQI)</h2>
+        <p>The WQI is calculated using the NSF formula, the most research-backed water quality index used by scientists worldwide.</p>
+        <div class="wqi-grid">
+            <div class="wqi-item" style="background:#e8f5e9;color:#34a853;">90-100: Excellent</div>
+            <div class="wqi-item" style="background:#e3f2fd;color:#4285F4;">70-89: Good</div>
+            <div class="wqi-item" style="background:#fff8e1;color:#f57c00;">50-69: Fair</div>
+            <div class="wqi-item" style="background:#fce4ec;color:#ea4335;">0-49: Poor</div>
+        </div>
+    </div>
+    <div class="card">
+        <h2>Parameters Explained</h2>
+        <div class="param-grid">
+            <div class="param-item"><b>pH</b>Acidity/alkalinity (ideal: 6.5-8.5)</div>
+            <div class="param-item"><b>Turbidity</b>Water clarity in NTU (ideal: &lt;1)</div>
+            <div class="param-item"><b>TDS</b>Total dissolved solids mg/L (ideal: &lt;500)</div>
+            <div class="param-item"><b>Hardness</b>Calcium/magnesium mg/L</div>
+            <div class="param-item"><b>Arsenic</b>Toxic metal (limit: 0.01 mg/L)</div>
+            <div class="param-item"><b>Nitrate</b>Agricultural runoff (limit: 10 mg/L)</div>
+            <div class="param-item"><b>Iron</b>Causes staining (limit: 0.3 mg/L)</div>
+            <div class="param-item"><b>Fluoride</b>Dental health (limit: 1.5 mg/L)</div>
+        </div>
+    </div>
+    <div class="card">
+        <h2>Data Sources</h2>
+        <p>Water quality data comes from the EPA Water Quality Portal. For ZIP codes without nearby EPA monitoring, our ML model predicts water quality using 11 features including satellite imagery (Sentinel-2), soil data (OpenMeteo), elevation, and distance to coast.</p>
+    </div>
+    <div class="card">
+        <h2>Contact Us</h2>
+        <p>Email: <a href="mailto:heibanoor81@gmail.com">heibanoor81@gmail.com</a><br><br>
+        Found a bug or have a suggestion? We'd love to hear from you!</p>
+    </div>
+</div>
+<div class="footer">© 2026 AquaIQ. All rights reserved.</div>
 </body>
 </html>
