@@ -738,9 +738,9 @@ body{font-family:-apple-system,Arial,sans-serif;overflow:hidden;}
 
 <script>
 var points = [];
+var layerGroups = {};
 var paramList=['ph','hardness','tds','turbidity','conductance','arsenic','iron','fluoride','manganese','nitrate','do','temp'];
 paramList.forEach(function(param){ layerGroups[param]=L.markerClusterGroup({maxClusterRadius:40,disableClusteringAtZoom:10}); });
-var layerGroups = {};
 fetch('national_full_map.json').then(function(r){return r.json();}).then(function(data){
     points=data;
     data.forEach(function(p){
