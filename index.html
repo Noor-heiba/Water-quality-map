@@ -258,7 +258,13 @@ function searchZip(){
             if(d<minD){minD=d;nearest=p;nearDist=d;}
         });
 
-        // Fetch OpenMeteo for ML prediction
+        // Show EPA data immediately
+            var quickSource = nearDist<5?'EPA Direct ('+nearDist.toFixed(1)+'km)':nearDist<20?'Blended ('+nearDist.toFixed(1)+'km)':'ML Prediction';
+            if(nearest){
+                showWQI(zip, {ph:nearest.ph,tds:nearest.tds,turbidity:nearest.turbidity,temp:nearest.temp,hardness:nearest.hardness,conductance:nearest.conductance,arsenic:nearest.arsenic,iron:nearest.iron,fluoride:nearest.fluoride,do:nearest.do,nitrate:nearest.nitrate}, quickSource, nearest.state);
+            }
+            document.getElementById('loading').style.display='none';
+            // Fetch OpenMeteo for ML prediction
         var omUrl='https://api.open-meteo.com/v1/forecast?latitude='+lat+'&longitude='+lon+
             '&daily=temperature_2m_max,precipitation_sum&hourly=soil_temperature_0cm,soil_temperature_18cm,'+
             'soil_moisture_0_to_1cm,soil_moisture_3_to_9cm&timezone=America%2FLos_Angeles&past_days=30';
