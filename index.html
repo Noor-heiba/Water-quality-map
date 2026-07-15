@@ -740,21 +740,18 @@ body{font-family:-apple-system,Arial,sans-serif;overflow:hidden;}
 var points = [];
 var paramList=['ph','hardness','tds','turbidity','conductance','arsenic','iron','fluoride','manganese','nitrate','do','temp'];
 paramList.forEach(function(param){ layerGroups[param]=L.markerClusterGroup({maxClusterRadius:40,disableClusteringAtZoom:10}); });
-fetch('national_full_map.json')
-.then(function(r){return r.json();})
-.then(function(data){
-    points = data;
+fetch('national_full_map.json').then(function(r){return r.json();}).then(function(data){
+    points=data;
     data.forEach(function(p){
         paramList.forEach(function(param){
             var color=getColor(p[param],param);
             if(!color)return;
             L.circleMarker([p.lat,p.lon],{radius:4,color:color,fillColor:color,fillOpacity:0.85,weight:0})
-            .bindPopup('<b>'+p.state+'</b><br>pH:'+p.ph+'<br>TDS:'+p.tds+'<br>Hardness:'+p.hardness)
-            .addTo(layerGroups[param]);
+            .bindPopup('<b>'+p.state+'</b>').addTo(layerGroups[param]);
         });
     });
     layerGroups['ph'].addTo(map);
-}).catch(function(e){ console.error('Error:', e); });
+});
 
 function toggleLayer(param,cb){
     if(cb.checked) layerGroups[param].addTo(map);
