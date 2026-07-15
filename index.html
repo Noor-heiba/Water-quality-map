@@ -4,7 +4,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>US Water Quality</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -186,7 +189,7 @@ function getColor(val,param){
 }
 
 var paramList=['ph','hardness','tds','turbidity','conductance','arsenic','iron','fluoride','manganese','nitrate','do','temp'];
-paramList.forEach(function(param){ layerGroups[param]=L.layerGroup(); });
+paramList.forEach(function(param){ layerGroups[param]=L.markerClusterGroup({maxClusterRadius:40,disableClusteringAtZoom:10}); });
 
 points.forEach(function(p){
     paramList.forEach(function(param){
