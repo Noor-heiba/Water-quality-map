@@ -4,8 +4,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>US Water Quality</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
 function getRecommendation(){
     var p = window.currentParams;
     var zip = window.currentZip;
@@ -273,8 +272,7 @@ function getRecommendation(){
     document.getElementById('rec-panel').style.display='block';
 }
 </script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js">
 function getRecommendation(){
     var p = window.currentParams;
     var zip = window.currentZip;
@@ -738,48 +736,24 @@ body{font-family:-apple-system,Arial,sans-serif;overflow:hidden;}
 
 <script>
 var points = [];
-var layerGroups = {};
-fetch('./national_full_map.json').then(r=>r.json()).then(data=>{
-  data.forEach(function(p){
-    ['ph','hardness','tds','turbidity','conductance','arsenic','iron','fluoride','manganese','nitrate','do','temp'].forEach(function(param){
-      if(!layerGroups[param]) layerGroups[param]=L.markerClusterGroup({maxClusterRadius:40,disableClusteringAtZoom:10});
-      var color=getColor(p[param],param);
-      if(!color)return;
-      L.circleMarker([p.lat,p.lon],{radius:4,color:color,fillColor:color,fillOpacity:0.85,weight:0})
-      .bindPopup('<b>'+p.state+'</b><br>pH:'+p.ph+'<br>TDS:'+p.tds+'<br>Hardness:'+p.hardness)
-      .addTo(layerGroups[param]);
-    });
-  });
-  if(layerGroups['ph']) layerGroups['ph'].addTo(map);
-});
-var map = L.map('map',{preferCanvas:true,zoomControl:true}).setView([39.5,-98.5],4);
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:''}).addTo(map);
-
-var ranges = {turbidity:[0,50],ph:[6,10],temp:[0,35],tds:[0,2000],
-    hardness:[0,500],conductance:[0,3000],arsenic:[0,0.05],
-    iron:[0,300],fluoride:[0,2],manganese:[0,50],nitrate:[0,10],do:[0,15]};
-
-function getColor(val,param){
-    if(val==='N/A'||val===null)return null;
-    var r=ranges[param]||[0,100];
-    var t=Math.min(Math.max((val-r[0])/(r[1]-r[0]),0),1);
-    return 'rgb('+Math.round(255*t)+',50,'+Math.round(255*(1-t))+')';
-}
-
 var paramList=['ph','hardness','tds','turbidity','conductance','arsenic','iron','fluoride','manganese','nitrate','do','temp'];
-paramList.forEach(function(param){ layerGroups[param]=L.layerGroup(); });
+paramList.forEach(function(param){ layerGroups[param]=L.markerClusterGroup({maxClusterRadius:40,disableClusteringAtZoom:10}); });
 
-points.forEach(function(p){
-    paramList.forEach(function(param){
-        var color=getColor(p[param],param);
-        if(!color)return;
-        L.circleMarker([p.lat,p.lon],{radius:4,color:color,fillColor:color,fillOpacity:0.85,weight:0})
-        .bindPopup('<b>'+p.state+'</b><br>pH: '+p.ph+'<br>Turbidity: '+p.turbidity+' NTU<br>TDS: '+p.tds+' mg/L<br>Arsenic: '+p.arsenic+' mg/L<br>Iron: '+p.iron+' ug/L')
-        .addTo(layerGroups[param]);
+fetch('national_full_map.json')
+.then(function(r){return r.json();})
+.then(function(data){
+    points = data;
+    data.forEach(function(p){
+        paramList.forEach(function(param){
+            var color=getColor(p[param],param);
+            if(!color)return;
+            L.circleMarker([p.lat,p.lon],{radius:4,color:color,fillColor:color,fillOpacity:0.85,weight:0})
+            .bindPopup('<b>'+p.state+'</b><br>pH:'+p.ph+'<br>TDS:'+p.tds+'<br>Hardness:'+p.hardness)
+            .addTo(layerGroups[param]);
+        });
     });
-});
-
-layerGroups['ph'].addTo(map);
+    layerGroups['ph'].addTo(map);
+}).catch(function(e){ console.error('Error loading map data:', e); });
 
 function toggleLayer(param,cb){
     if(cb.checked) layerGroups[param].addTo(map);
