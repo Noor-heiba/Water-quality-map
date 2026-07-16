@@ -258,32 +258,10 @@ function searchZip(){
         // Fetch OpenMeteo for ML prediction
         document.getElementById('loading').style.display='none';
         showWQI(zip, nearest, 'EPA Data', nearest.state);
-                // Determine source and blending
-            var source, weightEPA;
-            if(nearDist < 5){source='EPA Direct ('+nearDist.toFixed(1)+'km)';weightEPA=1.0;}
-            else if(nearDist < 20){source='Blended EPA+ML ('+nearDist.toFixed(1)+'km)';weightEPA=1-(nearDist-5)/15;}
-            else{source='ML Prediction (EPA '+nearDist.toFixed(0)+'km away)';weightEPA=0;}
 
-            // Build final values using nearest EPA + env features
-            var pred = {
-                ph: nearest&&nearest.ph!=='N/A'? weightEPA*nearest.ph+(1-weightEPA)*(6.5+env.avg_temp_max*0.01) : (6.5+env.avg_temp_max*0.01),
-                tds: nearest&&nearest.tds!=='N/A'? weightEPA*nearest.tds+(1-weightEPA)*(env.soil_moisture_deep*2000) : env.soil_moisture_deep*2000,
-                turbidity: nearest&&nearest.turbidity!=='N/A'? weightEPA*nearest.turbidity+(1-weightEPA)*(env.avg_precip*5) : env.avg_precip*5,
-                temp: nearest&&nearest.temp!=='N/A'? weightEPA*nearest.temp+(1-weightEPA)*env.avg_temp_max*0.7 : env.avg_temp_max*0.7,
-                hardness: nearest&&nearest.hardness!=='N/A'? nearest.hardness : null,
-                conductance: nearest&&nearest.conductance!=='N/A'? nearest.conductance : null,
-                arsenic: nearest&&nearest.arsenic!=='N/A'? nearest.arsenic : null,
-                iron: nearest&&nearest.iron!=='N/A'? nearest.iron : null,
-                fluoride: nearest&&nearest.fluoride!=='N/A'? nearest.fluoride : null,
-                do: nearest&&nearest.do!=='N/A'? nearest.do : null,
-                nitrate: nearest&&nearest.nitrate!=='N/A'? nearest.nitrate : null,
-            };
-
-            document.getElementById('loading').style.display='none';
-            showWQI(zip, pred, source, nearest ? nearest.state : 'N/A');
-        });
     });
 }
+
 
 function showWQI(zip, p, source, state){
     var wqi=calcWQI(p);
