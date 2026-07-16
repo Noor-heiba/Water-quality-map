@@ -374,7 +374,11 @@ function getAIAnalysis(){
         document.getElementById('ai-btn').parentNode.appendChild(div);
         document.getElementById('ai-btn').style.display='none';
     }).catch(function(e){
-        document.getElementById('ai-btn').innerText = 'AI unavailable - using rule-based';
+        var p2 = window.currentParams;
+        var prompt = 'Analyze my water quality: pH='+p2.ph+', TDS='+p2.tds+' mg/L, Turbidity='+p2.turbidity+' NTU, Hardness='+p2.hardness+' mg/L, Arsenic='+p2.arsenic+' mg/L, Nitrate='+p2.nitrate+' mg/L. Give me filter recommendations and health advice.';
+        window.open('https://claude.ai/new?q='+encodeURIComponent(prompt), '_blank');
+        document.getElementById('ai-btn').innerText = 'Get AI Deep Analysis';
+        document.getElementById('ai-btn').disabled = false;
     });
 }
 
