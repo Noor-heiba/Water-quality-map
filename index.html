@@ -260,7 +260,7 @@ function searchZip(){
             '&daily=temperature_2m_max,precipitation_sum&hourly=soil_temperature_0cm,soil_temperature_18cm,'+
             'soil_moisture_0_to_1cm,soil_moisture_3_to_9cm&timezone=America%2FLos_Angeles&past_days=30';
 
-        fetch(omUrl).then(function(r){return r.json();}).then(function(d){
+        document.getElementById('loading').style.display='none'; showWQI(zip,nearest,'EPA',nearest.state); if(false)fetch(omUrl).then(function(r){return r.json();}).then(function(d){
             var h=d.hourly,dd=d.daily;
             var env={
                 avg_temp_max: dd.temperature_2m_max.filter(Boolean).reduce(function(a,b){return a+b;})/dd.temperature_2m_max.length,
