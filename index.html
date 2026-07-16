@@ -304,8 +304,8 @@ function showWQI(zip, p, source, state){
     var label=wqi?getWQILabel(wqi):'N/A';
 
     var params=[
-        {n:'pH',v:p.ph?p.ph.toFixed(2):null,u:'',max:14},
-        {n:'Turbidity',v:p.turbidity?p.turbidity.toFixed(1):null,u:'NTU',max:50},
+        {n:'pH',v:(p.ph&&p.ph!='N/A')?parseFloat(p.ph).toFixed(2):null,u:'',max:14},
+        {n:'Turbidity',v:(p.turbidity&&p.turbidity!='N/A')?parseFloat(p.turbidity).toFixed(1):null,u:'NTU',max:50},
         {n:'TDS',v:p.tds?p.tds.toFixed(0):null,u:'mg/L',max:2000},
         {n:'Temperature',v:p.temp?p.temp.toFixed(1):null,u:'°C',max:35},
         {n:'Hardness',v:p.hardness?p.hardness.toFixed(0):null,u:'mg/L',max:500},
