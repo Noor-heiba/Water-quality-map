@@ -256,22 +256,9 @@ function searchZip(){
         });
 
         // Fetch OpenMeteo for ML prediction
-        var omUrl='https://api.open-meteo.com/v1/forecast?latitude='+lat+'&longitude='+lon+
-            '&daily=temperature_2m_max,precipitation_sum&hourly=soil_temperature_0cm,soil_temperature_18cm,'+
-            'soil_moisture_0_to_1cm,soil_moisture_3_to_9cm&timezone=America%2FLos_Angeles&past_days=30';
-
-        document.getElementById('loading').style.display='none'; showWQI(zip,nearest,'EPA',nearest.state); if(false)fetch(omUrl).then(function(r){return r.json();}).then(function(d){
-            var h=d.hourly,dd=d.daily;
-            var env={
-                avg_temp_max: dd.temperature_2m_max.filter(Boolean).reduce(function(a,b){return a+b;})/dd.temperature_2m_max.length,
-                avg_precip: dd.precipitation_sum.filter(Boolean).reduce(function(a,b){return a+b;})/dd.precipitation_sum.length,
-                soil_temp_surface: h.soil_temperature_0cm.filter(Boolean).reduce(function(a,b){return a+b;})/h.soil_temperature_0cm.length,
-                soil_temp_deep: h.soil_temperature_18cm.filter(Boolean).reduce(function(a,b){return a+b;})/h.soil_temperature_18cm.length,
-                soil_moisture_surface: h.soil_moisture_0_to_1cm.filter(Boolean).reduce(function(a,b){return a+b;})/h.soil_moisture_0_to_1cm.length,
-                soil_moisture_deep: h.soil_moisture_3_to_9cm.filter(Boolean).reduce(function(a,b){return a+b;})/h.soil_moisture_3_to_9cm.length,
-            };
-
-            // Determine source and blending
+        document.getElementById('loading').style.display='none';
+        showWQI(zip, nearest, 'EPA Data', nearest.state);
+                // Determine source and blending
             var source, weightEPA;
             if(nearDist < 5){source='EPA Direct ('+nearDist.toFixed(1)+'km)';weightEPA=1.0;}
             else if(nearDist < 20){source='Blended EPA+ML ('+nearDist.toFixed(1)+'km)';weightEPA=1-(nearDist-5)/15;}
