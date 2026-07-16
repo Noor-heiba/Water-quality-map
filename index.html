@@ -89,6 +89,7 @@ body{font-family:-apple-system,Arial,sans-serif;overflow:hidden;}
         <button id="wqiBtn" onclick="toggleWQI()">Water Quality Index</button>
         <button id="dashBtn" onclick="document.getElementById('dashboard').style.display='block'">Analysis Dashboard</button>
         <button id="layerBtn" onclick="toggleDrawer()">Layers</button>
+        <button id="era5Btn" onclick="showERA5()" style="padding:8px 12px;background:#6a1b9a;color:white;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;">Climate Trend</button>
         <button id="coolBtn" onclick="findCoolingCenters()" style="padding:8px 12px;background:#0277bd;color:white;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;">Cooling Centers</button>
         <button id="heatBtn" onclick="toggleHeat()" style="padding:8px 12px;background:#e53935;color:white;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;">Heat Map</button>
         
@@ -255,6 +256,7 @@ function searchZip(){
         map.setView([lat,lon],10);
         if(searchMarker)map.removeLayer(searchMarker);
         searchMarker=L.marker([lat,lon]).addTo(map).bindPopup('ZIP: '+zip).openPopup();
+        window.currentZipCoords={lat:lat,lon:lon};
 
         // Find nearest EPA point
         var nearest=null,minD=999,nearDist=0;
@@ -516,6 +518,53 @@ function findCoolingCenters(){
     }).catch(function(e){
         document.getElementById('coolBtn').innerText='Cooling Centers';
         alert('Could not load cooling centers');
+    });
+}
+
+
+function showERA5(){
+    if(!window.currentZipCoords){
+        alert('Search a ZIP code first!');
+        return;
+    }
+    var lat=window.currentZipCoords.lat, lon=window.currentZipCoords.lon;
+    document.getElementById('era5Btn').innerText='Loading...';
+
+    var url='https://archive-api.open-meteo.com/v1/archive?latitude='+lat+'&longitude='+lon+
+        '&start_date=2020-01-01&end_date=2024-12-31&monthly=temperature_2m_mean,precipitation_sum&timezone=auto';
+
+    fetch(url).then(function(r){return r.json();}).then(function(d){
+        var months=d.monthly.time;
+        var temps=d.monthly.temperature_2m_mean;
+        var precip=d.monthly.precipitation_sum;
+
+        var html='<div style="padding:15px;"><h3 style="font-size:14px;margin-bottom:10px;">Climate Trend 2020-2024</h3>';
+        html+='<canvas id="era5Chart" height="200"></canvas></div>';
+
+        document.getElementById('dashboard').style.display='block';
+        document.getElementById('dashboard').innerHTML='<button id="dash-close" onclick="document.getElementById('dashboard').style.display='none';document.getElementById('era5Btn').innerText='Climate Trend';" style="position:fixed;top:10px;right:10px;background:#ea4335;color:white;border:none;border-radius:8px;padding:8px 14px;cursor:pointer;font-size:14px;z-index:5001;">Close</button>'+html;
+
+        new Chart(document.getElementById('era5Chart'),{
+            type:'line',
+            data:{
+                labels:months,
+                datasets:[
+                    {label:'Avg Temp (C)',data:temps,borderColor:'#e53935',fill:false,yAxisID:'y'},
+                    {label:'Precipitation (mm)',data:precip,borderColor:'#1565c0',fill:false,yAxisID:'y1'}
+                ]
+            },
+            options:{
+                responsive:true,
+                scales:{
+                    y:{position:'left',title:{display:true,text:'Temperature (C)'}},
+                    y1:{position:'right',title:{display:true,text:'Precipitation (mm)'}}
+                }
+            }
+        });
+        document.getElementById('era5Btn').innerText='Climate Trend';
+    }).catch(function(e){
+        document.getElementById('era5Btn').innerText='Climate Trend';
+        alert('Could not load climate data');
     });
 }
 
