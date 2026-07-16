@@ -270,6 +270,39 @@ function searchZip(){
         else source='ML Prediction (nearest EPA '+nearDist.toFixed(0)+'km)';
         showWQI(zip, nearest, source, nearest.state);
 
+        // Background OpenMeteo fetch for blending (non-blocking)
+        if(nearDist >= 5){
+            var omUrl='https://api.open-meteo.com/v1/forecast?latitude='+lat+'&longitude='+lon+
+                '&daily=temperature_2m_max,precipitation_sum&hourly=soil_moisture_0_to_1cm,soil_moisture_3_to_9cm&timezone=auto&past_days=30';
+            fetch(omUrl).then(function(r){return r.json();}).then(function(d){
+                var dd=d.daily, h=d.hourly;
+                var avgTemp=dd.temperature_2m_max.filter(Boolean).reduce(function(a,b){return a+b;})/dd.temperature_2m_max.length;
+                var avgPrecip=dd.precipitation_sum.filter(Boolean).reduce(function(a,b){return a+b;})/dd.precipitation_sum.length;
+                var soilMoist=h.soil_moisture_0_to_1cm.filter(Boolean).reduce(function(a,b){return a+b;})/h.soil_moisture_0_to_1cm.length;
+
+                var weightEPA = nearDist<20 ? 1-(nearDist-5)/15 : 0;
+                var blended = {};
+                var mlPH = 6.5 + avgTemp*0.01 - avgPrecip*0.005;
+                var mlTDS = soilMoist * 1800 + 50;
+                var mlTurb = avgPrecip * 4;
+
+                blended.ph = nearest.ph!='N/A' ? weightEPA*parseFloat(nearest.ph)+(1-weightEPA)*mlPH : mlPH;
+                blended.tds = nearest.tds!='N/A' ? weightEPA*parseFloat(nearest.tds)+(1-weightEPA)*mlTDS : mlTDS;
+                blended.turbidity = nearest.turbidity!='N/A' ? weightEPA*parseFloat(nearest.turbidity)+(1-weightEPA)*mlTurb : mlTurb;
+                blended.temp = nearest.temp!='N/A' ? nearest.temp : avgTemp*0.7;
+                blended.hardness = nearest.hardness;
+                blended.conductance = nearest.conductance;
+                blended.arsenic = nearest.arsenic;
+                blended.iron = nearest.iron;
+                blended.fluoride = nearest.fluoride;
+                blended.do = nearest.do;
+                blended.nitrate = nearest.nitrate;
+                blended.state = nearest.state;
+
+                showWQI(zip, blended, source+' (updated)', nearest.state);
+            }).catch(function(e){ console.log('OpenMeteo unavailable, using EPA only'); });
+        }
+
     });
 }
 
