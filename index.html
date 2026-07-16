@@ -297,8 +297,57 @@ function showWQI(zip, p, source, state){
         '<div class="wqi-score" style="color:'+color+'">'+wqi+'</div>'+
         '<div class="wqi-badge" style="background:'+color+'22;color:'+color+'">'+label+'</div>'+
         '<div class="source-badge">Source: '+source+'</div>'+
-        rows;
-    document.getElementById('wqi-panel').style.display='block';
+        rows+
+        '<button onclick="showFilterRec()" style="margin-top:12px;width:100%;padding:12px;background:#4285F4;color:white;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;">Get Filter Recommendation</button>';
+    document.getElementById('wqi-panel').style.display='block'; window.currentParams = p;
+}
+
+
+function showFilterRec(){
+    var p = window.currentParams;
+    if(!p) return;
+    var concerns = [];
+    var filter = 'Basic carbon filter (e.g. Brita)';
+
+    if(p.ph && p.ph != 'N/A'){
+        var ph = parseFloat(p.ph);
+        if(ph < 6.5) concerns.push('pH too low ('+ph+') - acidic water may corrode pipes');
+        else if(ph > 8.5) concerns.push('pH too high ('+ph+') - alkaline water may cause scaling');
+    }
+    if(p.tds && p.tds != 'N/A' && parseFloat(p.tds) > 500){
+        concerns.push('High TDS ('+Math.round(p.tds)+' mg/L) - reverse osmosis recommended');
+        filter = 'Reverse Osmosis (e.g. APEC ROES-50)';
+    }
+    if(p.hardness && p.hardness != 'N/A' && parseFloat(p.hardness) > 200){
+        concerns.push('Hard water ('+Math.round(p.hardness)+' mg/L) - water softener recommended');
+        if(filter == 'Basic carbon filter (e.g. Brita)') filter = 'Water Softener (e.g. Aquasana)';
+    }
+    if(p.turbidity && p.turbidity != 'N/A' && parseFloat(p.turbidity) > 1){
+        concerns.push('High turbidity ('+parseFloat(p.turbidity).toFixed(1)+' NTU) - sediment filter recommended');
+        if(filter == 'Basic carbon filter (e.g. Brita)') filter = 'Sediment Filter + Carbon Filter';
+    }
+    if(p.arsenic && p.arsenic != 'N/A' && parseFloat(p.arsenic) > 0.01){
+        concerns.push('High arsenic ('+p.arsenic+' mg/L) - HEALTH RISK, RO required');
+        filter = 'Reverse Osmosis (e.g. APEC ROES-50)';
+    }
+    if(p.nitrate && p.nitrate != 'N/A' && parseFloat(p.nitrate) > 10){
+        concerns.push('High nitrate ('+p.nitrate+' mg/L) - dangerous for infants, RO required');
+        filter = 'Reverse Osmosis (e.g. APEC ROES-50)';
+    }
+
+    var html = '<h3 style="margin-bottom:10px;">Filter Recommendation</h3>';
+    if(concerns.length === 0){
+        html += '<p style="color:#34a853;font-size:13px;">Your water quality looks good! A basic carbon filter is sufficient.</p>';
+    } else {
+        html += '<ul style="font-size:13px;padding-left:16px;margin-bottom:10px;">';
+        concerns.forEach(function(c){ html += '<li style="margin-bottom:4px;">'+c+'</li>'; });
+        html += '</ul>';
+    }
+    html += '<div style="background:#e3f2fd;border-radius:8px;padding:12px;font-size:13px;">';
+    html += '<b>Recommended:</b> '+filter+'</div>';
+
+    document.getElementById('wqi-content').innerHTML += '<div style="margin-top:12px;">'+html+'</div>';
+    window.currentParams = p;
 }
 
 function toggleWQI(){
