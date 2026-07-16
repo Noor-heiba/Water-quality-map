@@ -361,24 +361,16 @@ function showFilterRec(){
         else concerns.push('Conductance '+Math.round(c)+' uS/cm - normal');
     }
 
-    // Build multiple filter list
-    var filters = [];
-    if(filter != 'Basic carbon filter (e.g. Brita)') filters.push(filter);
-    if(html.indexOf('hard water') > -1 && filters.indexOf('Water Softener (e.g. Aquasana)') == -1) filters.push('Water Softener (e.g. Aquasana)');
-    if(filters.length == 0) filters.push('Basic carbon filter (e.g. Brita)');
-
-    var html2 = '<h3 style="margin-bottom:10px;font-size:15px;">Water Quality Analysis</h3>';
-    html2 += '<div style="font-size:12px;">';
-    concerns.forEach(function(c){
-        var icon = c.indexOf('normal') > -1 || c.indexOf('acceptable') > -1 || c.indexOf('safe') > -1 || c.indexOf('clear') > -1 || c.indexOf('good') > -1 ? '✅' : c.indexOf('HEALTH') > -1 ? '❌' : '⚠️';
-        html2 += '<div style="padding:4px 0;border-bottom:1px solid #f0f0f0;">'+icon+' '+c+'</div>';
-    });
-    html2 += '</div>';
-    html2 += '<div style="background:#e3f2fd;border-radius:8px;padding:12px;font-size:13px;margin-top:10px;">';
-    html2 += '<b>Recommended Filters:</b><ul style="margin:6px 0 0 0;padding-left:16px;">';
-    filters.forEach(function(f){ html2 += '<li>'+f+'</li>'; });
-    html2 += '</ul></div>';
-    var html = html2;
+    var html = '<h3 style="margin-bottom:10px;">Filter Recommendation</h3>';
+    if(concerns.length === 0){
+        html += '<p style="color:#34a853;font-size:13px;">Your water quality looks good! A basic carbon filter is sufficient.</p>';
+    } else {
+        html += '<ul style="font-size:13px;padding-left:16px;margin-bottom:10px;">';
+        concerns.forEach(function(c){ html += '<li style="margin-bottom:4px;">'+c+'</li>'; });
+        html += '</ul>';
+    }
+    html += '<div style="background:#e3f2fd;border-radius:8px;padding:12px;font-size:13px;">';
+    html += '<b>Recommended:</b> '+filter+'</div>';
 
     document.getElementById('wqi-content').innerHTML += '<div style="margin-top:12px;">'+html+'<button onclick="getAIAnalysis()" id="ai-btn" style="margin-top:10px;width:100%;padding:12px;background:linear-gradient(135deg,#1a1a2e,#4285F4);color:white;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;">Get AI Deep Analysis</button></div>';
     window.currentParams = p;
