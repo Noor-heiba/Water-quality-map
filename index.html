@@ -346,8 +346,36 @@ function showFilterRec(){
     html += '<div style="background:#e3f2fd;border-radius:8px;padding:12px;font-size:13px;">';
     html += '<b>Recommended:</b> '+filter+'</div>';
 
-    document.getElementById('wqi-content').innerHTML += '<div style="margin-top:12px;">'+html+'</div>';
+    document.getElementById('wqi-content').innerHTML += '<div style="margin-top:12px;">'+html+'<button onclick="getAIAnalysis()" id="ai-btn" style="margin-top:10px;width:100%;padding:12px;background:linear-gradient(135deg,#1a1a2e,#4285F4);color:white;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;">Get AI Deep Analysis</button></div>';
     window.currentParams = p;
+}
+
+function getAIAnalysis(){
+    var p = window.currentParams;
+    if(!p) return;
+    document.getElementById('ai-btn').innerText = 'Analyzing...';
+    document.getElementById('ai-btn').disabled = true;
+
+    var prompt = 'You are a water quality expert. Analyze this water data and give a short personalized recommendation (max 150 words). Data: pH='+p.ph+', TDS='+p.tds+' mg/L, Turbidity='+p.turbidity+' NTU, Hardness='+p.hardness+' mg/L, Arsenic='+p.arsenic+' mg/L, Nitrate='+p.nitrate+' mg/L, Iron='+p.iron+' ug/L, Fluoride='+p.fluoride+' mg/L. Give specific filter recommendations and health advice.';
+
+    fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            model: 'claude-sonnet-4-6',
+            max_tokens: 300,
+            messages: [{role: 'user', content: prompt}]
+        })
+    }).then(function(r){return r.json();}).then(function(d){
+        var text = d.content[0].text;
+        var div = document.createElement('div');
+        div.style = 'margin-top:10px;background:#f8f9fa;border-radius:10px;padding:12px;font-size:13px;line-height:1.6;border-left:4px solid #4285F4;';
+        div.innerHTML = '<b style="color:#4285F4;">AI Analysis:</b><br>' + text;
+        document.getElementById('ai-btn').parentNode.appendChild(div);
+        document.getElementById('ai-btn').style.display='none';
+    }).catch(function(e){
+        document.getElementById('ai-btn').innerText = 'AI unavailable - using rule-based';
+    });
 }
 
 function toggleWQI(){
