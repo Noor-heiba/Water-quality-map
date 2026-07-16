@@ -89,6 +89,7 @@ body{font-family:-apple-system,Arial,sans-serif;overflow:hidden;}
         <button id="wqiBtn" onclick="toggleWQI()">Water Quality Index</button>
         <button id="dashBtn" onclick="document.getElementById('dashboard').style.display='block'">Analysis Dashboard</button>
         <button id="layerBtn" onclick="toggleDrawer()">Layers</button>
+        <button id="coolBtn" onclick="findCoolingCenters()" style="padding:8px 12px;background:#0277bd;color:white;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;">Cooling Centers</button>
         <button id="heatBtn" onclick="toggleHeat()" style="padding:8px 12px;background:#e53935;color:white;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;">Heat Map</button>
         
     </div>
@@ -440,6 +441,46 @@ function toggleHeat(){
         document.getElementById('heatBtn').style.background='#333';
         document.getElementById('heatBtn').innerText='Hide Heat';
     }
+}
+
+
+var coolingMarkers = [];
+var coolingVisible = false;
+
+function findCoolingCenters(){
+    if(coolingVisible){
+        coolingMarkers.forEach(function(m){ map.removeLayer(m); });
+        coolingMarkers = [];
+        coolingVisible = false;
+        document.getElementById('coolBtn').style.background='#0277bd';
+        document.getElementById('coolBtn').innerText='Cooling Centers';
+        return;
+    }
+    var center = map.getCenter();
+    var bbox = (center.lat-0.5)+','+(center.lng-0.5)+','+(center.lat+0.5)+','+(center.lng+0.5);
+    document.getElementById('coolBtn').innerText='Loading...';
+
+    var query = '[out:json][timeout:25];(node["amenity"="community_centre"]('+bbox+');node["amenity"="library"]('+bbox+');node["leisure"="swimming_pool"]["access"="public"]('+bbox+'););out body;';
+
+    fetch('https://overpass-api.de/api/interpreter?data='+encodeURIComponent(query))
+    .then(function(r){return r.json();})
+    .then(function(d){
+        d.elements.forEach(function(e){
+            if(!e.lat||!e.lon) return;
+            var name = e.tags.name || e.tags.amenity || 'Cooling Center';
+            var m = L.marker([e.lat,e.lon],{
+                icon: L.divIcon({html:'<div style="background:#0277bd;color:white;padding:3px 6px;border-radius:4px;font-size:10px;font-weight:600;white-space:nowrap;">❄️ '+name+'</div>',className:''})
+            }).bindPopup('<b>'+name+'</b><br>Cooling Center').addTo(map);
+            coolingMarkers.push(m);
+        });
+        coolingVisible = true;
+        document.getElementById('coolBtn').style.background='#333';
+        document.getElementById('coolBtn').innerText='Hide Cooling';
+        if(coolingMarkers.length===0) alert('No cooling centers found in this area. Try zooming to a city!');
+    }).catch(function(e){
+        document.getElementById('coolBtn').innerText='Cooling Centers';
+        alert('Could not load cooling centers');
+    });
 }
 
 function toggleWQI(){
