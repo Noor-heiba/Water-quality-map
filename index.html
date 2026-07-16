@@ -31,7 +31,7 @@ function getRecommendation(){
     var dataCount = 0;
     var totalParams = Object.keys(standards).length;
 
-    if(p.ph && p.ph !== 'N/A'){
+    if(p.ph && p.ph !== "N/A"){
         dataCount++;
         if(p.ph < 6.5){
             concerns.push({param:'pH', val:p.ph, msg:'Too acidic ('+p.ph+'). May corrode pipes and leach metals.', color:'#ea4335', severity:'high'});
@@ -43,7 +43,7 @@ function getRecommendation(){
             concerns.push({param:'pH', val:p.ph, msg:'pH '+p.ph+' is within safe range (6.5-8.5).', color:'#34a853', severity:'ok'});
         }
     }
-    if(p.tds && p.tds !== 'N/A'){
+    if(p.tds && p.tds !== "N/A"){
         dataCount++;
         if(p.tds > 1000){
             concerns.push({param:'TDS', val:p.tds, msg:'Very high TDS ('+Math.round(p.tds)+' mg/L). Water may taste salty or bitter.', color:'#ea4335', severity:'high'});
@@ -55,7 +55,7 @@ function getRecommendation(){
             concerns.push({param:'TDS', val:p.tds, msg:'TDS '+Math.round(p.tds)+' mg/L is within acceptable range.', color:'#34a853', severity:'ok'});
         }
     }
-    if(p.turbidity && p.turbidity !== 'N/A'){
+    if(p.turbidity && p.turbidity !== "N/A"){
         dataCount++;
         if(p.turbidity > 4){
             concerns.push({param:'Turbidity', val:p.turbidity, msg:'High turbidity ('+p.turbidity+' NTU). Water is visibly cloudy — sediment or bacteria risk.', color:'#ea4335', severity:'high'});
@@ -68,7 +68,7 @@ function getRecommendation(){
             concerns.push({param:'Turbidity', val:p.turbidity, msg:'Turbidity '+p.turbidity+' NTU is within safe range.', color:'#34a853', severity:'ok'});
         }
     }
-    if(p.hardness && p.hardness !== 'N/A'){
+    if(p.hardness && p.hardness !== "N/A"){
         dataCount++;
         if(p.hardness > 300){
             concerns.push({param:'Hardness', val:p.hardness, msg:'Very hard water ('+Math.round(p.hardness)+' mg/L). Will cause scaling on appliances and dry skin.', color:'#ea4335', severity:'high'});
@@ -80,7 +80,7 @@ function getRecommendation(){
             concerns.push({param:'Hardness', val:p.hardness, msg:'Water hardness '+Math.round(p.hardness)+' mg/L is acceptable.', color:'#34a853', severity:'ok'});
         }
     }
-    if(p.arsenic && p.arsenic !== 'N/A'){
+    if(p.arsenic && p.arsenic !== "N/A"){
         dataCount++;
         if(p.arsenic > 0.01){
             concerns.push({param:'Arsenic', val:p.arsenic, msg:'ALERT: Arsenic ('+p.arsenic+' mg/L) exceeds WHO limit of 0.01 mg/L. Health risk!', color:'#ea4335', severity:'critical'});
@@ -90,7 +90,7 @@ function getRecommendation(){
             concerns.push({param:'Arsenic', val:p.arsenic, msg:'Arsenic '+p.arsenic+' mg/L is within safe limit.', color:'#34a853', severity:'ok'});
         }
     }
-    if(p.iron && p.iron !== 'N/A'){
+    if(p.iron && p.iron !== "N/A"){
         dataCount++;
         if(p.iron > 300){
             concerns.push({param:'Iron', val:p.iron, msg:'High iron ('+p.iron+' ug/L). Causes staining, metallic taste, and pipe corrosion.', color:'#ea4335', severity:'high'});
@@ -102,7 +102,7 @@ function getRecommendation(){
             concerns.push({param:'Iron', val:p.iron, msg:'Iron '+p.iron+' ug/L is within acceptable range.', color:'#34a853', severity:'ok'});
         }
     }
-    if(p.fluoride && p.fluoride !== 'N/A'){
+    if(p.fluoride && p.fluoride !== "N/A"){
         dataCount++;
         if(p.fluoride > 1.5){
             concerns.push({param:'Fluoride', val:p.fluoride, msg:'High fluoride ('+p.fluoride+' mg/L). Exceeds WHO limit — long-term risk of dental/bone fluorosis.', color:'#ea4335', severity:'high'});
@@ -112,7 +112,7 @@ function getRecommendation(){
             concerns.push({param:'Fluoride', val:p.fluoride, msg:'Fluoride '+p.fluoride+' mg/L is within safe range.', color:'#34a853', severity:'ok'});
         }
     }
-    if(p.nitrate && p.nitrate !== 'N/A'){
+    if(p.nitrate && p.nitrate !== "N/A"){
         dataCount++;
         if(p.nitrate > 10){
             concerns.push({param:'Nitrate', val:p.nitrate, msg:'High nitrate ('+p.nitrate+' mg/L). Exceeds EPA limit — dangerous for infants (blue baby syndrome).', color:'#ea4335', severity:'critical'});
@@ -244,10 +244,10 @@ function getRecommendation(){
     }).join('');
 
     var missingParams = [];
-    if(!p.arsenic || p.arsenic==='N/A') missingParams.push('Arsenic');
-    if(!p.nitrate || p.nitrate==='N/A') missingParams.push('Nitrate');
-    if(!p.manganese || p.manganese==='N/A') missingParams.push('Manganese');
-    if(!p.fluoride || p.fluoride==='N/A') missingParams.push('Fluoride');
+    if(!p.arsenic || p.arsenic==="N/A") missingParams.push('Arsenic');
+    if(!p.nitrate || p.nitrate==="N/A") missingParams.push('Nitrate');
+    if(!p.manganese || p.manganese==="N/A") missingParams.push('Manganese');
+    if(!p.fluoride || p.fluoride==="N/A") missingParams.push('Fluoride');
 
     var testsHtml = missingParams.length > 0 ?
         '<div class="rec-card"><h3>Additional Tests Recommended</h3>'+
@@ -299,7 +299,7 @@ function getRecommendation(){
     var dataCount = 0;
     var totalParams = Object.keys(standards).length;
 
-    if(p.ph && p.ph !== 'N/A'){
+    if(p.ph && p.ph !== "N/A"){
         dataCount++;
         if(p.ph < 6.5){
             concerns.push({param:'pH', val:p.ph, msg:'Too acidic ('+p.ph+'). May corrode pipes and leach metals.', color:'#ea4335', severity:'high'});
@@ -311,7 +311,7 @@ function getRecommendation(){
             concerns.push({param:'pH', val:p.ph, msg:'pH '+p.ph+' is within safe range (6.5-8.5).', color:'#34a853', severity:'ok'});
         }
     }
-    if(p.tds && p.tds !== 'N/A'){
+    if(p.tds && p.tds !== "N/A"){
         dataCount++;
         if(p.tds > 1000){
             concerns.push({param:'TDS', val:p.tds, msg:'Very high TDS ('+Math.round(p.tds)+' mg/L). Water may taste salty or bitter.', color:'#ea4335', severity:'high'});
@@ -323,7 +323,7 @@ function getRecommendation(){
             concerns.push({param:'TDS', val:p.tds, msg:'TDS '+Math.round(p.tds)+' mg/L is within acceptable range.', color:'#34a853', severity:'ok'});
         }
     }
-    if(p.turbidity && p.turbidity !== 'N/A'){
+    if(p.turbidity && p.turbidity !== "N/A"){
         dataCount++;
         if(p.turbidity > 4){
             concerns.push({param:'Turbidity', val:p.turbidity, msg:'High turbidity ('+p.turbidity+' NTU). Water is visibly cloudy — sediment or bacteria risk.', color:'#ea4335', severity:'high'});
@@ -336,7 +336,7 @@ function getRecommendation(){
             concerns.push({param:'Turbidity', val:p.turbidity, msg:'Turbidity '+p.turbidity+' NTU is within safe range.', color:'#34a853', severity:'ok'});
         }
     }
-    if(p.hardness && p.hardness !== 'N/A'){
+    if(p.hardness && p.hardness !== "N/A"){
         dataCount++;
         if(p.hardness > 300){
             concerns.push({param:'Hardness', val:p.hardness, msg:'Very hard water ('+Math.round(p.hardness)+' mg/L). Will cause scaling on appliances and dry skin.', color:'#ea4335', severity:'high'});
@@ -348,7 +348,7 @@ function getRecommendation(){
             concerns.push({param:'Hardness', val:p.hardness, msg:'Water hardness '+Math.round(p.hardness)+' mg/L is acceptable.', color:'#34a853', severity:'ok'});
         }
     }
-    if(p.arsenic && p.arsenic !== 'N/A'){
+    if(p.arsenic && p.arsenic !== "N/A"){
         dataCount++;
         if(p.arsenic > 0.01){
             concerns.push({param:'Arsenic', val:p.arsenic, msg:'ALERT: Arsenic ('+p.arsenic+' mg/L) exceeds WHO limit of 0.01 mg/L. Health risk!', color:'#ea4335', severity:'critical'});
@@ -358,7 +358,7 @@ function getRecommendation(){
             concerns.push({param:'Arsenic', val:p.arsenic, msg:'Arsenic '+p.arsenic+' mg/L is within safe limit.', color:'#34a853', severity:'ok'});
         }
     }
-    if(p.iron && p.iron !== 'N/A'){
+    if(p.iron && p.iron !== "N/A"){
         dataCount++;
         if(p.iron > 300){
             concerns.push({param:'Iron', val:p.iron, msg:'High iron ('+p.iron+' ug/L). Causes staining, metallic taste, and pipe corrosion.', color:'#ea4335', severity:'high'});
@@ -370,7 +370,7 @@ function getRecommendation(){
             concerns.push({param:'Iron', val:p.iron, msg:'Iron '+p.iron+' ug/L is within acceptable range.', color:'#34a853', severity:'ok'});
         }
     }
-    if(p.fluoride && p.fluoride !== 'N/A'){
+    if(p.fluoride && p.fluoride !== "N/A"){
         dataCount++;
         if(p.fluoride > 1.5){
             concerns.push({param:'Fluoride', val:p.fluoride, msg:'High fluoride ('+p.fluoride+' mg/L). Exceeds WHO limit — long-term risk of dental/bone fluorosis.', color:'#ea4335', severity:'high'});
@@ -380,7 +380,7 @@ function getRecommendation(){
             concerns.push({param:'Fluoride', val:p.fluoride, msg:'Fluoride '+p.fluoride+' mg/L is within safe range.', color:'#34a853', severity:'ok'});
         }
     }
-    if(p.nitrate && p.nitrate !== 'N/A'){
+    if(p.nitrate && p.nitrate !== "N/A"){
         dataCount++;
         if(p.nitrate > 10){
             concerns.push({param:'Nitrate', val:p.nitrate, msg:'High nitrate ('+p.nitrate+' mg/L). Exceeds EPA limit — dangerous for infants (blue baby syndrome).', color:'#ea4335', severity:'critical'});
@@ -512,10 +512,10 @@ function getRecommendation(){
     }).join('');
 
     var missingParams = [];
-    if(!p.arsenic || p.arsenic==='N/A') missingParams.push('Arsenic');
-    if(!p.nitrate || p.nitrate==='N/A') missingParams.push('Nitrate');
-    if(!p.manganese || p.manganese==='N/A') missingParams.push('Manganese');
-    if(!p.fluoride || p.fluoride==='N/A') missingParams.push('Fluoride');
+    if(!p.arsenic || p.arsenic==="N/A") missingParams.push('Arsenic');
+    if(!p.nitrate || p.nitrate==="N/A") missingParams.push('Nitrate');
+    if(!p.manganese || p.manganese==="N/A") missingParams.push('Manganese');
+    if(!p.fluoride || p.fluoride==="N/A") missingParams.push('Fluoride');
 
     var testsHtml = missingParams.length > 0 ?
         '<div class="rec-card"><h3>Additional Tests Recommended</h3>'+
@@ -745,7 +745,7 @@ var ranges = {turbidity:[0,50],ph:[6,10],temp:[0,35],tds:[0,2000],
     iron:[0,300],fluoride:[0,2],manganese:[0,50],nitrate:[0,10],do:[0,15]};
 
 function getColor(val,param){
-    if(val==='N/A'||val===null)return null;
+    if(val==="N/A"||val===null)return null;
     var r=ranges[param]||[0,100];
     var t=Math.min(Math.max((val-r[0])/(r[1]-r[0]),0),1);
     return 'rgb('+Math.round(255*t)+',50,'+Math.round(255*(1-t))+')';
@@ -782,7 +782,7 @@ var wqiMax={do:14,ph:8.5,turbidity:1,nitrate:10,tds:500,temp:25,hardness:200,flu
 function calcWQI(p){
     var ws=0,wt=0;
     Object.keys(wqiW).forEach(function(k){
-        var v=p[k]; if(v===undefined||v===null||v==='N/A')return;
+        var v=p[k]; if(v===undefined||v===null||v==="N/A")return;
         var s; if(k==='ph') s=100-Math.abs(v-7.5)/1.5*100;
         else if(k==='do') s=Math.min(v/9*100,100);
         else s=Math.max(100-v/wqiMax[k]*100,0);
@@ -845,21 +845,21 @@ function searchZip(){
 
             // Build final values using nearest EPA + env features
             var pred = {
-                ph: nearest&&nearest.ph!=='N/A'? weightEPA*nearest.ph+(1-weightEPA)*(6.5+env.avg_temp_max*0.01) : (6.5+env.avg_temp_max*0.01),
-                tds: nearest&&nearest.tds!=='N/A'? weightEPA*nearest.tds+(1-weightEPA)*(env.soil_moisture_deep*2000) : env.soil_moisture_deep*2000,
-                turbidity: nearest&&nearest.turbidity!=='N/A'? weightEPA*nearest.turbidity+(1-weightEPA)*(env.avg_precip*5) : env.avg_precip*5,
-                temp: nearest&&nearest.temp!=='N/A'? weightEPA*nearest.temp+(1-weightEPA)*env.avg_temp_max*0.7 : env.avg_temp_max*0.7,
-                hardness: nearest&&nearest.hardness!=='N/A'? nearest.hardness : null,
-                conductance: nearest&&nearest.conductance!=='N/A'? nearest.conductance : null,
-                arsenic: nearest&&nearest.arsenic!=='N/A'? nearest.arsenic : null,
-                iron: nearest&&nearest.iron!=='N/A'? nearest.iron : null,
-                fluoride: nearest&&nearest.fluoride!=='N/A'? nearest.fluoride : null,
-                do: nearest&&nearest.do!=='N/A'? nearest.do : null,
-                nitrate: nearest&&nearest.nitrate!=='N/A'? nearest.nitrate : null,
+                ph: nearest&&nearest.ph!=="N/A"? weightEPA*nearest.ph+(1-weightEPA)*(6.5+env.avg_temp_max*0.01) : (6.5+env.avg_temp_max*0.01),
+                tds: nearest&&nearest.tds!=="N/A"? weightEPA*nearest.tds+(1-weightEPA)*(env.soil_moisture_deep*2000) : env.soil_moisture_deep*2000,
+                turbidity: nearest&&nearest.turbidity!=="N/A"? weightEPA*nearest.turbidity+(1-weightEPA)*(env.avg_precip*5) : env.avg_precip*5,
+                temp: nearest&&nearest.temp!=="N/A"? weightEPA*nearest.temp+(1-weightEPA)*env.avg_temp_max*0.7 : env.avg_temp_max*0.7,
+                hardness: nearest&&nearest.hardness!=="N/A"? nearest.hardness : null,
+                conductance: nearest&&nearest.conductance!=="N/A"? nearest.conductance : null,
+                arsenic: nearest&&nearest.arsenic!=="N/A"? nearest.arsenic : null,
+                iron: nearest&&nearest.iron!=="N/A"? nearest.iron : null,
+                fluoride: nearest&&nearest.fluoride!=="N/A"? nearest.fluoride : null,
+                do: nearest&&nearest.do!=="N/A"? nearest.do : null,
+                nitrate: nearest&&nearest.nitrate!=="N/A"? nearest.nitrate : null,
             };
 
             document.getElementById('loading').style.display='none';
-            showWQI(zip, pred, source, nearest ? nearest.state : 'N/A');
+            showWQI(zip, pred, source, nearest ? nearest.state : "N/A");
         });
     });
 }
@@ -867,20 +867,20 @@ function searchZip(){
 function showWQI(zip, p, source, state){
     var wqi=calcWQI(p);
     var color=wqi?getWQIColor(wqi):'#888';
-    var label=wqi?getWQILabel(wqi):'N/A';
+    var label=wqi?getWQILabel(wqi):"N/A";
 
     var params=[
-        {n:'pH',v:(p.ph&&p.ph!=='N/A')?parseFloat(p.ph).toFixed(2):null,u:'',max:14},
-        {n:'Turbidity',v:(p.turbidity&&p.turbidity!=='N/A')?parseFloat(p.turbidity).toFixed(1):null,u:'NTU',max:50},
-        {n:'TDS',v:(p.tds&&p.tds!=='N/A')?parseFloat(p.tds).toFixed(0):null,u:'mg/L',max:2000},
-        {n:'Temperature',v:(p.temp&&p.temp!=='N/A')?parseFloat(p.temp).toFixed(1):null,u:'°C',max:35},
-        {n:'Hardness',v:(p.hardness&&p.hardness!=='N/A')?parseFloat(p.hardness).toFixed(0):null,u:'mg/L',max:500},
-        {n:'Conductance',v:(p.conductance&&p.conductance!=='N/A')?parseFloat(p.conductance).toFixed(0):null,u:'uS/cm',max:3000},
-        {n:'Arsenic',v:(p.arsenic&&p.arsenic!=='N/A')?parseFloat(p.arsenic).toFixed(4):null,u:'mg/L',max:0.05},
-        {n:'Iron',v:(p.iron&&p.iron!=='N/A')?parseFloat(p.iron).toFixed(1):null,u:'ug/L',max:300},
-        {n:'Fluoride',v:(p.fluoride&&p.fluoride!=='N/A')?parseFloat(p.fluoride).toFixed(2):null,u:'mg/L',max:2},
-        {n:'Nitrate',v:(p.nitrate&&p.nitrate!=='N/A')?parseFloat(p.nitrate).toFixed(2):null,u:'mg/L',max:10},
-        {n:'Dissolved O2',v:(p.do&&p.do!=='N/A')?parseFloat(p.do).toFixed(1):null,u:'mg/L',max:15},
+        {n:'pH',v:(p.ph&&p.ph!=="N/A")?parseFloat(p.ph).toFixed(2):null,u:'',max:14},
+        {n:'Turbidity',v:(p.turbidity&&p.turbidity!=="N/A")?parseFloat(p.turbidity).toFixed(1):null,u:'NTU',max:50},
+        {n:'TDS',v:(p.tds&&p.tds!=="N/A")?parseFloat(p.tds).toFixed(0):null,u:'mg/L',max:2000},
+        {n:'Temperature',v:(p.temp&&p.temp!=="N/A")?parseFloat(p.temp).toFixed(1):null,u:'°C',max:35},
+        {n:'Hardness',v:(p.hardness&&p.hardness!=="N/A")?parseFloat(p.hardness).toFixed(0):null,u:'mg/L',max:500},
+        {n:'Conductance',v:(p.conductance&&p.conductance!=="N/A")?parseFloat(p.conductance).toFixed(0):null,u:'uS/cm',max:3000},
+        {n:'Arsenic',v:(p.arsenic&&p.arsenic!=="N/A")?parseFloat(p.arsenic).toFixed(4):null,u:'mg/L',max:0.05},
+        {n:'Iron',v:(p.iron&&p.iron!=="N/A")?parseFloat(p.iron).toFixed(1):null,u:'ug/L',max:300},
+        {n:'Fluoride',v:(p.fluoride&&p.fluoride!=="N/A")?parseFloat(p.fluoride).toFixed(2):null,u:'mg/L',max:2},
+        {n:'Nitrate',v:(p.nitrate&&p.nitrate!=="N/A")?parseFloat(p.nitrate).toFixed(2):null,u:'mg/L',max:10},
+        {n:'Dissolved O2',v:(p.do&&p.do!=="N/A")?parseFloat(p.do).toFixed(1):null,u:'mg/L',max:15},
     ];
 
     var rows=params.filter(function(x){return x.v!==null;}).map(function(x){
@@ -967,7 +967,7 @@ function getRecommendation(){
     var dataCount = 0;
     var totalParams = Object.keys(standards).length;
 
-    if(p.ph && p.ph !== 'N/A'){
+    if(p.ph && p.ph !== "N/A"){
         dataCount++;
         if(p.ph < 6.5){
             concerns.push({param:'pH', val:p.ph, msg:'Too acidic ('+p.ph+'). May corrode pipes and leach metals.', color:'#ea4335', severity:'high'});
@@ -979,7 +979,7 @@ function getRecommendation(){
             concerns.push({param:'pH', val:p.ph, msg:'pH '+p.ph+' is within safe range (6.5-8.5).', color:'#34a853', severity:'ok'});
         }
     }
-    if(p.tds && p.tds !== 'N/A'){
+    if(p.tds && p.tds !== "N/A"){
         dataCount++;
         if(p.tds > 1000){
             concerns.push({param:'TDS', val:p.tds, msg:'Very high TDS ('+Math.round(p.tds)+' mg/L). Water may taste salty or bitter.', color:'#ea4335', severity:'high'});
@@ -991,7 +991,7 @@ function getRecommendation(){
             concerns.push({param:'TDS', val:p.tds, msg:'TDS '+Math.round(p.tds)+' mg/L is within acceptable range.', color:'#34a853', severity:'ok'});
         }
     }
-    if(p.turbidity && p.turbidity !== 'N/A'){
+    if(p.turbidity && p.turbidity !== "N/A"){
         dataCount++;
         if(p.turbidity > 4){
             concerns.push({param:'Turbidity', val:p.turbidity, msg:'High turbidity ('+p.turbidity+' NTU). Water is visibly cloudy — sediment or bacteria risk.', color:'#ea4335', severity:'high'});
@@ -1004,7 +1004,7 @@ function getRecommendation(){
             concerns.push({param:'Turbidity', val:p.turbidity, msg:'Turbidity '+p.turbidity+' NTU is within safe range.', color:'#34a853', severity:'ok'});
         }
     }
-    if(p.hardness && p.hardness !== 'N/A'){
+    if(p.hardness && p.hardness !== "N/A"){
         dataCount++;
         if(p.hardness > 300){
             concerns.push({param:'Hardness', val:p.hardness, msg:'Very hard water ('+Math.round(p.hardness)+' mg/L). Will cause scaling on appliances and dry skin.', color:'#ea4335', severity:'high'});
@@ -1016,7 +1016,7 @@ function getRecommendation(){
             concerns.push({param:'Hardness', val:p.hardness, msg:'Water hardness '+Math.round(p.hardness)+' mg/L is acceptable.', color:'#34a853', severity:'ok'});
         }
     }
-    if(p.arsenic && p.arsenic !== 'N/A'){
+    if(p.arsenic && p.arsenic !== "N/A"){
         dataCount++;
         if(p.arsenic > 0.01){
             concerns.push({param:'Arsenic', val:p.arsenic, msg:'ALERT: Arsenic ('+p.arsenic+' mg/L) exceeds WHO limit of 0.01 mg/L. Health risk!', color:'#ea4335', severity:'critical'});
@@ -1026,7 +1026,7 @@ function getRecommendation(){
             concerns.push({param:'Arsenic', val:p.arsenic, msg:'Arsenic '+p.arsenic+' mg/L is within safe limit.', color:'#34a853', severity:'ok'});
         }
     }
-    if(p.iron && p.iron !== 'N/A'){
+    if(p.iron && p.iron !== "N/A"){
         dataCount++;
         if(p.iron > 300){
             concerns.push({param:'Iron', val:p.iron, msg:'High iron ('+p.iron+' ug/L). Causes staining, metallic taste, and pipe corrosion.', color:'#ea4335', severity:'high'});
@@ -1038,7 +1038,7 @@ function getRecommendation(){
             concerns.push({param:'Iron', val:p.iron, msg:'Iron '+p.iron+' ug/L is within acceptable range.', color:'#34a853', severity:'ok'});
         }
     }
-    if(p.fluoride && p.fluoride !== 'N/A'){
+    if(p.fluoride && p.fluoride !== "N/A"){
         dataCount++;
         if(p.fluoride > 1.5){
             concerns.push({param:'Fluoride', val:p.fluoride, msg:'High fluoride ('+p.fluoride+' mg/L). Exceeds WHO limit — long-term risk of dental/bone fluorosis.', color:'#ea4335', severity:'high'});
@@ -1048,7 +1048,7 @@ function getRecommendation(){
             concerns.push({param:'Fluoride', val:p.fluoride, msg:'Fluoride '+p.fluoride+' mg/L is within safe range.', color:'#34a853', severity:'ok'});
         }
     }
-    if(p.nitrate && p.nitrate !== 'N/A'){
+    if(p.nitrate && p.nitrate !== "N/A"){
         dataCount++;
         if(p.nitrate > 10){
             concerns.push({param:'Nitrate', val:p.nitrate, msg:'High nitrate ('+p.nitrate+' mg/L). Exceeds EPA limit — dangerous for infants (blue baby syndrome).', color:'#ea4335', severity:'critical'});
@@ -1180,10 +1180,10 @@ function getRecommendation(){
     }).join('');
 
     var missingParams = [];
-    if(!p.arsenic || p.arsenic==='N/A') missingParams.push('Arsenic');
-    if(!p.nitrate || p.nitrate==='N/A') missingParams.push('Nitrate');
-    if(!p.manganese || p.manganese==='N/A') missingParams.push('Manganese');
-    if(!p.fluoride || p.fluoride==='N/A') missingParams.push('Fluoride');
+    if(!p.arsenic || p.arsenic==="N/A") missingParams.push('Arsenic');
+    if(!p.nitrate || p.nitrate==="N/A") missingParams.push('Nitrate');
+    if(!p.manganese || p.manganese==="N/A") missingParams.push('Manganese');
+    if(!p.fluoride || p.fluoride==="N/A") missingParams.push('Fluoride');
 
     var testsHtml = missingParams.length > 0 ?
         '<div class="rec-card"><h3>Additional Tests Recommended</h3>'+
