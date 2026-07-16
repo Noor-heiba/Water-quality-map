@@ -870,17 +870,17 @@ function showWQI(zip, p, source, state){
     var label=wqi?getWQILabel(wqi):'N/A';
 
     var params=[
-        {n:'pH',v:p.ph?p.ph.toFixed(2):null,u:'',max:14},
-        {n:'Turbidity',v:p.turbidity?p.turbidity.toFixed(1):null,u:'NTU',max:50},
-        {n:'TDS',v:p.tds?p.tds.toFixed(0):null,u:'mg/L',max:2000},
-        {n:'Temperature',v:p.temp?p.temp.toFixed(1):null,u:'°C',max:35},
-        {n:'Hardness',v:p.hardness?p.hardness.toFixed(0):null,u:'mg/L',max:500},
-        {n:'Conductance',v:p.conductance?p.conductance.toFixed(0):null,u:'uS/cm',max:3000},
-        {n:'Arsenic',v:p.arsenic?p.arsenic.toFixed(4):null,u:'mg/L',max:0.05},
-        {n:'Iron',v:p.iron?p.iron.toFixed(1):null,u:'ug/L',max:300},
-        {n:'Fluoride',v:p.fluoride?p.fluoride.toFixed(2):null,u:'mg/L',max:2},
-        {n:'Nitrate',v:p.nitrate?p.nitrate.toFixed(2):null,u:'mg/L',max:10},
-        {n:'Dissolved O2',v:p.do?p.do.toFixed(1):null,u:'mg/L',max:15},
+        {n:'pH',v:(p.ph&&p.ph!=='N/A')?parseFloat(p.ph).toFixed(2):null,u:'',max:14},
+        {n:'Turbidity',v:(p.turbidity&&p.turbidity!=='N/A')?parseFloat(p.turbidity).toFixed(1):null,u:'NTU',max:50},
+        {n:'TDS',v:(p.tds&&p.tds!=='N/A')?parseFloat(p.tds).toFixed(0):null,u:'mg/L',max:2000},
+        {n:'Temperature',v:(p.temp&&p.temp!=='N/A')?parseFloat(p.temp).toFixed(1):null,u:'°C',max:35},
+        {n:'Hardness',v:(p.hardness&&p.hardness!=='N/A')?parseFloat(p.hardness).toFixed(0):null,u:'mg/L',max:500},
+        {n:'Conductance',v:(p.conductance&&p.conductance!=='N/A')?parseFloat(p.conductance).toFixed(0):null,u:'uS/cm',max:3000},
+        {n:'Arsenic',v:(p.arsenic&&p.arsenic!=='N/A')?parseFloat(p.arsenic).toFixed(4):null,u:'mg/L',max:0.05},
+        {n:'Iron',v:(p.iron&&p.iron!=='N/A')?parseFloat(p.iron).toFixed(1):null,u:'ug/L',max:300},
+        {n:'Fluoride',v:(p.fluoride&&p.fluoride!=='N/A')?parseFloat(p.fluoride).toFixed(2):null,u:'mg/L',max:2},
+        {n:'Nitrate',v:(p.nitrate&&p.nitrate!=='N/A')?parseFloat(p.nitrate).toFixed(2):null,u:'mg/L',max:10},
+        {n:'Dissolved O2',v:(p.do&&p.do!=='N/A')?parseFloat(p.do).toFixed(1):null,u:'mg/L',max:15},
     ];
 
     var rows=params.filter(function(x){return x.v!==null;}).map(function(x){
