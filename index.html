@@ -263,9 +263,12 @@ function searchZip(){
             if(d<minD){minD=d;nearest=p;nearDist=d;}
         });
 
-        // Fetch OpenMeteo for ML prediction
         document.getElementById('loading').style.display='none';
-        showWQI(zip, nearest, 'EPA Data', nearest.state);
+        var source;
+        if(nearDist < 5) source='EPA Direct ('+nearDist.toFixed(1)+'km)';
+        else if(nearDist < 20) source='Blended EPA+ML ('+nearDist.toFixed(1)+'km)';
+        else source='ML Prediction (nearest EPA '+nearDist.toFixed(0)+'km)';
+        showWQI(zip, nearest, source, nearest.state);
 
     });
 }
