@@ -341,6 +341,20 @@ function showWQI(zip, p, source, state){
         '<div class="wqi-score" style="color:'+color+'">'+wqi+'</div>'+
         '<div class="wqi-badge" style="background:'+color+'22;color:'+color+'">'+label+'</div>'+
         '<div class="source-badge">Source: '+source+'</div>'+
+        (function(){
+            var heatRisk = 0;
+            var riskLabel = 'Low';
+            var riskColor = '#34a853';
+            if(p.temp && p.temp != 'N/A') heatRisk += parseFloat(p.temp) > 20 ? 30 : 10;
+            if(coolingMarkers.length === 0) heatRisk += 40;
+            else if(coolingMarkers.length < 3) heatRisk += 20;
+            if(p.turbidity && p.turbidity != 'N/A' && parseFloat(p.turbidity) > 1) heatRisk += 15;
+            if(p.tds && p.tds != 'N/A' && parseFloat(p.tds) > 500) heatRisk += 15;
+            if(heatRisk > 60){riskLabel='High';riskColor='#ea4335';}
+            else if(heatRisk > 30){riskLabel='Medium';riskColor='#fbbc04';}
+            return '<div style="text-align:center;margin:8px 0;padding:8px;border-radius:8px;background:'+riskColor+'22;">'+
+                '<span style="font-size:12px;color:'+riskColor+';font-weight:700;">Heat Risk: '+riskLabel+' ('+heatRisk+')</span></div>';
+        })()+
         rows+
         '<button onclick="showFilterRec()" style="margin-top:12px;width:100%;padding:12px;background:#4285F4;color:white;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;">Get Filter Recommendation</button>';
     document.getElementById('wqi-panel').style.display='block'; window.currentParams = p;
