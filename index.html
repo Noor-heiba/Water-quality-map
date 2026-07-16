@@ -311,28 +311,54 @@ function showFilterRec(){
 
     if(p.ph && p.ph != 'N/A'){
         var ph = parseFloat(p.ph);
-        if(ph < 6.5) concerns.push('pH too low ('+ph+') - acidic water may corrode pipes');
-        else if(ph > 8.5) concerns.push('pH too high ('+ph+') - alkaline water may cause scaling');
+        if(ph < 6.5) concerns.push('pH '+ph+' - too acidic, may corrode pipes');
+        else if(ph > 8.5) concerns.push('pH '+ph+' - too alkaline, may cause scaling');
+        else concerns.push('pH '+ph+' - normal range');
     }
-    if(p.tds && p.tds != 'N/A' && parseFloat(p.tds) > 500){
-        concerns.push('High TDS ('+Math.round(p.tds)+' mg/L) - reverse osmosis recommended');
-        filter = 'Reverse Osmosis (e.g. APEC ROES-50)';
+    if(p.tds && p.tds != 'N/A'){
+        var tds = parseFloat(p.tds);
+        if(tds > 500){ concerns.push('TDS '+Math.round(tds)+' mg/L - above WHO limit of 500'); filter = 'Reverse Osmosis (e.g. APEC ROES-50)'; }
+        else concerns.push('TDS '+Math.round(tds)+' mg/L - acceptable');
     }
-    if(p.hardness && p.hardness != 'N/A' && parseFloat(p.hardness) > 200){
-        concerns.push('Hard water ('+Math.round(p.hardness)+' mg/L) - water softener recommended');
-        if(filter == 'Basic carbon filter (e.g. Brita)') filter = 'Water Softener (e.g. Aquasana)';
+    if(p.hardness && p.hardness != 'N/A'){
+        var h = parseFloat(p.hardness);
+        if(h > 200){ concerns.push('Hardness '+Math.round(h)+' mg/L - hard water, scaling risk'); if(filter=='Basic carbon filter (e.g. Brita)') filter='Water Softener (e.g. Aquasana)'; }
+        else concerns.push('Hardness '+Math.round(h)+' mg/L - acceptable');
     }
-    if(p.turbidity && p.turbidity != 'N/A' && parseFloat(p.turbidity) > 1){
-        concerns.push('High turbidity ('+parseFloat(p.turbidity).toFixed(1)+' NTU) - sediment filter recommended');
-        if(filter == 'Basic carbon filter (e.g. Brita)') filter = 'Sediment Filter + Carbon Filter';
+    if(p.turbidity && p.turbidity != 'N/A'){
+        var t = parseFloat(p.turbidity);
+        if(t > 1){ concerns.push('Turbidity '+t.toFixed(1)+' NTU - above WHO limit of 1'); if(filter=='Basic carbon filter (e.g. Brita)') filter='Sediment Filter + Carbon Filter'; }
+        else concerns.push('Turbidity '+t.toFixed(1)+' NTU - clear');
     }
-    if(p.arsenic && p.arsenic != 'N/A' && parseFloat(p.arsenic) > 0.01){
-        concerns.push('High arsenic ('+p.arsenic+' mg/L) - HEALTH RISK, RO required');
-        filter = 'Reverse Osmosis (e.g. APEC ROES-50)';
+    if(p.arsenic && p.arsenic != 'N/A'){
+        var a = parseFloat(p.arsenic);
+        if(a > 0.01){ concerns.push('Arsenic '+a+' mg/L - HEALTH RISK, above WHO limit'); filter='Reverse Osmosis (e.g. APEC ROES-50)'; }
+        else concerns.push('Arsenic '+a+' mg/L - safe');
     }
-    if(p.nitrate && p.nitrate != 'N/A' && parseFloat(p.nitrate) > 10){
-        concerns.push('High nitrate ('+p.nitrate+' mg/L) - dangerous for infants, RO required');
-        filter = 'Reverse Osmosis (e.g. APEC ROES-50)';
+    if(p.nitrate && p.nitrate != 'N/A'){
+        var n = parseFloat(p.nitrate);
+        if(n > 10){ concerns.push('Nitrate '+n+' mg/L - above EPA limit, dangerous for infants'); filter='Reverse Osmosis (e.g. APEC ROES-50)'; }
+        else concerns.push('Nitrate '+n+' mg/L - safe');
+    }
+    if(p.iron && p.iron != 'N/A'){
+        var ir = parseFloat(p.iron);
+        if(ir > 300){ concerns.push('Iron '+ir+' ug/L - high, causes staining'); if(filter=='Basic carbon filter (e.g. Brita)') filter='Iron Removal Filter'; }
+        else concerns.push('Iron '+ir+' ug/L - acceptable');
+    }
+    if(p.fluoride && p.fluoride != 'N/A'){
+        var f = parseFloat(p.fluoride);
+        if(f > 1.5){ concerns.push('Fluoride '+f+' mg/L - above WHO limit'); if(filter=='Basic carbon filter (e.g. Brita)') filter='Reverse Osmosis (e.g. APEC ROES-50)'; }
+        else concerns.push('Fluoride '+f+' mg/L - safe');
+    }
+    if(p.do && p.do != 'N/A'){
+        var dox = parseFloat(p.do);
+        if(dox < 6.5) concerns.push('Dissolved oxygen '+dox+' mg/L - low, poor water quality');
+        else concerns.push('Dissolved oxygen '+dox+' mg/L - good');
+    }
+    if(p.conductance && p.conductance != 'N/A'){
+        var c = parseFloat(p.conductance);
+        if(c > 800) concerns.push('Conductance '+Math.round(c)+' uS/cm - high mineral content');
+        else concerns.push('Conductance '+Math.round(c)+' uS/cm - normal');
     }
 
     var html = '<h3 style="margin-bottom:10px;">Filter Recommendation</h3>';
