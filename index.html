@@ -375,7 +375,7 @@ function getAIAnalysis(){
         document.getElementById('ai-btn').style.display='none';
     }).catch(function(e){
         var p2 = window.currentParams;
-        var prompt = 'Analyze my water quality: pH='+p2.ph+', TDS='+p2.tds+' mg/L, Turbidity='+p2.turbidity+' NTU, Hardness='+p2.hardness+' mg/L, Arsenic='+p2.arsenic+' mg/L, Nitrate='+p2.nitrate+' mg/L. Give me filter recommendations and health advice.';
+        var prompt = 'You are a water quality expert. Analyze ALL of this water data and give specific filter recommendations and health advice (max 200 words). Data: pH='+p2.ph+', TDS='+p2.tds+' mg/L, Turbidity='+p2.turbidity+' NTU, Hardness='+p2.hardness+' mg/L, Arsenic='+p2.arsenic+' mg/L, Nitrate='+p2.nitrate+' mg/L, Iron='+p2.iron+' ug/L, Fluoride='+p2.fluoride+' mg/L, Dissolved Oxygen='+p2.do+' mg/L, Conductance='+p2.conductance+' uS/cm, Temperature='+p2.temp+' C. Compare each parameter to WHO/EPA limits and recommend specific filters.';
         window.open('https://claude.ai/new?q='+encodeURIComponent(prompt), '_blank');
         document.getElementById('ai-btn').innerText = 'Get AI Deep Analysis';
         document.getElementById('ai-btn').disabled = false;
