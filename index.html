@@ -251,6 +251,12 @@ function searchZip(){
         if(searchMarker)map.removeLayer(searchMarker);
         searchMarker=L.marker([lat,lon]).addTo(map).bindPopup('ZIP: '+zip).openPopup();
 
+        // If points not loaded yet, wait
+        if(points.length === 0){
+            document.getElementById('loading').innerHTML='Loading map data first...';
+            setTimeout(function(){ searchZip(); }, 2000);
+            return;
+        }
         // Find nearest EPA point
         var nearest=null,minD=999,nearDist=0;
         points.forEach(function(p){
