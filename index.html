@@ -8,6 +8,8 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
+<script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+<script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -87,6 +89,8 @@ body{font-family:-apple-system,Arial,sans-serif;overflow:hidden;}
         <button id="wqiBtn" onclick="toggleWQI()">Water Quality Index</button>
         <button id="dashBtn" onclick="document.getElementById('dashboard').style.display='block'">Analysis Dashboard</button>
         <button id="layerBtn" onclick="toggleDrawer()">Layers</button>
+        <button id="heatBtn" onclick="toggleHeat()" style="padding:8px 12px;background:#e53935;color:white;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;">Heat Map</button>
+        <button id="heatBtn" onclick="toggleHeat()" style="padding:8px 12px;background:#e53935;color:white;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;">Heat Map</button>
     </div>
 </div>
 
@@ -409,6 +413,61 @@ function getAIAnalysis(){
         document.getElementById('ai-btn').innerText = 'Get AI Deep Analysis';
         document.getElementById('ai-btn').disabled = false;
     });
+}
+
+
+var heatLayer = null;
+var heatVisible = false;
+
+function toggleHeat(){
+    if(heatVisible){
+        if(heatLayer) map.removeLayer(heatLayer);
+        heatVisible = false;
+        document.getElementById('heatBtn').style.background='#e53935';
+        document.getElementById('heatBtn').innerText='Heat Map';
+        return;
+    }
+    document.getElementById('heatBtn').innerText='Loading...';
+    // Build heat data from points temperature
+    var heatData = [];
+    points.forEach(function(p){
+        if(p.temp && p.temp != 'N/A' && p.lat && p.lon){
+            heatData.push([p.lat, p.lon, parseFloat(p.temp)/35]);
+        }
+    });
+    if(heatData.length > 0){
+        heatLayer = L.heatLayer(heatData, {radius:25,blur:15,maxZoom:10,gradient:{0.4:'blue',0.6:'lime',0.8:'yellow',1.0:'red'}}).addTo(map);
+        heatVisible = true;
+        document.getElementById('heatBtn').style.background='#333';
+        document.getElementById('heatBtn').innerText='Hide Heat';
+    }
+}
+
+
+var heatLayer = null;
+var heatVisible = false;
+
+function toggleHeat(){
+    if(heatVisible){
+        if(heatLayer) map.removeLayer(heatLayer);
+        heatVisible = false;
+        document.getElementById('heatBtn').style.background='#e53935';
+        document.getElementById('heatBtn').innerText='Heat Map';
+        return;
+    }
+    document.getElementById('heatBtn').innerText='Loading...';
+    var heatData = [];
+    points.forEach(function(p){
+        if(p.temp && p.temp != 'N/A' && p.lat && p.lon){
+            heatData.push([p.lat, p.lon, parseFloat(p.temp)/35]);
+        }
+    });
+    if(heatData.length > 0){
+        heatLayer = L.heatLayer(heatData, {radius:25,blur:15,maxZoom:10,gradient:{0.4:'blue',0.6:'lime',0.8:'yellow',1.0:'red'}}).addTo(map);
+        heatVisible = true;
+        document.getElementById('heatBtn').style.background='#333';
+        document.getElementById('heatBtn').innerText='Hide Heat';
+    }
 }
 
 function toggleWQI(){
