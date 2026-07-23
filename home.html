@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BluewatchAI - Water Quality Intelligence</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:-apple-system,Arial,sans-serif;background:#0a1628;color:white;}
+nav{display:flex;justify-content:space-between;align-items:center;padding:20px 40px;background:rgba(10,22,40,0.95);}
+nav .logo{font-size:22px;font-weight:700;color:#64b5f6;}
+nav a{color:#90caf9;text-decoration:none;margin-left:24px;font-size:14px;}
+.hero{text-align:center;padding:100px 20px 80px;}
+.hero h1{font-size:52px;font-weight:700;margin-bottom:16px;background:linear-gradient(135deg,#64b5f6,#ffffff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.hero p{font-size:20px;color:#90caf9;max-width:600px;margin:0 auto 40px;}
+.btn-row{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;}
+.btn-primary{background:#1565c0;color:white;padding:14px 32px;border-radius:12px;text-decoration:none;font-weight:600;font-size:16px;}
+.btn-secondary{background:rgba(255,255,255,0.1);color:white;padding:14px 32px;border-radius:12px;text-decoration:none;font-weight:600;font-size:16px;border:1px solid rgba(255,255,255,0.2);}
+.features{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:24px;padding:60px 40px;max-width:1200px;margin:0 auto;}
+.feature-card{background:rgba(255,255,255,0.05);border-radius:16px;padding:28px;border:1px solid rgba(100,181,246,0.2);}
+.feature-card .icon{font-size:36px;margin-bottom:16px;}
+.feature-card h3{font-size:18px;font-weight:600;margin-bottom:8px;color:#64b5f6;}
+.feature-card p{font-size:14px;color:#90caf9;line-height:1.6;}
+.stats{display:flex;justify-content:center;gap:60px;padding:60px 40px;flex-wrap:wrap;background:rgba(255,255,255,0.03);}
+.stat{text-align:center;}
+.stat .number{font-size:42px;font-weight:700;color:#64b5f6;}
+.stat .label{font-size:14px;color:#90caf9;margin-top:4px;}
+.cta{text-align:center;padding:80px 40px;}
+.cta h2{font-size:36px;font-weight:700;margin-bottom:16px;}
+.cta p{color:#90caf9;font-size:18px;margin-bottom:32px;}
+footer{text-align:center;padding:40px;border-top:1px solid rgba(255,255,255,0.1);color:#90caf9;font-size:14px;}
+footer a{color:#64b5f6;text-decoration:none;margin:0 12px;}
+</style>
+</head>
+<body>
+<nav>
+  <div class="logo">💧 BluewatchAI</div>
+  <div>
+    <a href="https://noor-heiba.github.io/Water-quality-map/">Map</a>
+    <a href="privacy.html">Privacy</a>
+    <a href="support.html">Support</a>
+    <a href="terms.html">Terms</a>
+  </div>
+</nav>
+
+<div class="hero">
+  <h1>Know Your Water Quality</h1>
+  <p>AI-powered water quality analysis for every US ZIP code. Real EPA data, ML predictions, and personalized filter recommendations.</p>
+  <div class="btn-row">
+    <a href="https://noor-heiba.github.io/Water-quality-map/" class="btn-primary">Open Map</a>
+    <a href="support.html" class="btn-secondary">Learn More</a>
+  </div>
+</div>
+
+<div class="stats">
+  <div class="stat"><div class="number">38,979</div><div class="label">EPA Monitoring Sites</div></div>
+  <div class="stat"><div class="number">50</div><div class="label">US States Covered</div></div>
+  <div class="stat"><div class="number">14</div><div class="label">Water Parameters</div></div>
+  <div class="stat"><div class="number">1.1M+</div><div class="label">Measurements</div></div>
+</div>
+
+<div class="features">
+  <div class="feature-card">
+    <div class="icon">🗺️</div>
+    <h3>Interactive Map</h3>
+    <p>Explore water quality data across the entire United States with color-coded markers for 14 parameters.</p>
+  </div>
+  <div class="feature-card">
+    <div class="icon">🔍</div>
+    <h3>ZIP Code Search</h3>
+    <p>Search any US ZIP code to instantly see water quality data and WQI score for your area.</p>
+  </div>
+  <div class="feature-card">
+    <div class="icon">🤖</div>
+    <h3>AI Predictions</h3>
+    <p>Machine learning models trained on satellite and climate data predict water quality in areas without EPA stations.</p>
+  </div>
+  <div class="feature-card">
+    <div class="icon">💧</div>
+    <h3>Filter Recommendations</h3>
+    <p>Get personalized water filter recommendations based on your local water quality data and WHO/EPA standards.</p>
+  </div>
+  <div class="feature-card">
+    <div class="icon">🌡️</div>
+    <h3>Heat Island Detection</h3>
+    <p>Identify urban heat islands and find nearby cooling centers to protect vulnerable communities.</p>
+  </div>
+  <div class="feature-card">
+    <div class="icon">📊</div>
+    <h3>Water Quality Index</h3>
+    <p>NSF-formula WQI score gives you an instant snapshot of overall water quality from 0-100.</p>
+  </div>
+</div>
+
+<div class="cta">
+  <h2>Start Exploring Your Water</h2>
+  <p>Free to use. No account required. Powered by EPA data.</p>
+  <a href="https://noor-heiba.github.io/Water-quality-map/" class="btn-primary">Open the Map</a>
+</div>
+
+<footer>
+  <p>Built by Noor Heiba | <a href="privacy.html">Privacy Policy</a> <a href="support.html">Support</a> <a href="terms.html">Terms of Service</a></p>
+  <p style="margin-top:8px;">Data sourced from EPA Water Quality Portal</p>
+</footer>
+</body>
+</html>
