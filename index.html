@@ -562,12 +562,30 @@ function compareZips(){
         .then(function(data){
             if(!data||!data[0]){ cb(null); return; }
             var lat=parseFloat(data[0].lat), lon=parseFloat(data[0].lon);
-            var nearest=null, minD=999;
+            var nearest=null, minD=999, nearDist=0;
             points.forEach(function(p){
                 var d=Math.sqrt(Math.pow((p.lat-lat)*111,2)+Math.pow((p.lon-lon)*85,2));
-                if(d<minD){minD=d;nearest=p;}
+                if(d<minD){minD=d;nearest=p;nearDist=d;}
             });
-            cb(nearest, zip);
+            // Blend with OpenMeteo
+            var omUrl='https://api.open-meteo.com/v1/forecast?latitude='+lat+'&longitude='+lon+
+                '&daily=temperature_2m_max,precipitation_sum&hourly=soil_moisture_0_to_1cm,soil_moisture_3_to_9cm&timezone=auto&past_days=30';
+            fetch(omUrl).then(function(r){return r.json();}).then(function(om){
+                var dd=om.daily, h=om.hourly;
+                var avgTemp=dd.temperature_2m_max.filter(Boolean).reduce(function(a,b){return a+b;})/dd.temperature_2m_max.length;
+                var avgPrecip=dd.precipitation_sum.filter(Boolean).reduce(function(a,b){return a+b;})/dd.precipitation_sum.length;
+                var soilMoist=h.soil_moisture_0_to_1cm.filter(Boolean).reduce(function(a,b){return a+b;})/h.soil_moisture_0_to_1cm.length;
+                var weightEPA = nearDist<5 ? 1.0 : nearDist<20 ? 1-(nearDist-5)/15 : 0;
+                var mlPH = 6.5 + avgTemp*0.01 - avgPrecip*0.005;
+                var mlTDS = soilMoist*1800+50;
+                var mlTurb = avgPrecip*4;
+                var blended = JSON.parse(JSON.stringify(nearest||{}));
+                blended.ph = nearest&&nearest.ph!='N/A' ? (weightEPA*parseFloat(nearest.ph)+(1-weightEPA)*mlPH).toFixed(2) : mlPH.toFixed(2);
+                blended.tds = nearest&&nearest.tds!='N/A' ? (weightEPA*parseFloat(nearest.tds)+(1-weightEPA)*mlTDS).toFixed(0) : mlTDS.toFixed(0);
+                blended.turbidity = nearest&&nearest.turbidity!='N/A' ? (weightEPA*parseFloat(nearest.turbidity)+(1-weightEPA)*mlTurb).toFixed(1) : mlTurb.toFixed(1);
+                blended.temp = nearest&&nearest.temp!='N/A' ? nearest.temp : (avgTemp*0.7).toFixed(1);
+                cb(blended, zip);
+            }).catch(function(){ cb(nearest, zip); });
         });
     }
 
