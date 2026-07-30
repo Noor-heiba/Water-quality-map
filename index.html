@@ -76,6 +76,15 @@ body{font-family:-apple-system,Arial,sans-serif;overflow:hidden;}
 #loading{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
     background:rgba(0,0,0,0.7);color:white;padding:12px 20px;border-radius:10px;
     z-index:9999;display:none;font-size:14px;}
+
+#bottom-tabs{position:fixed;bottom:0;left:0;right:0;height:60px;background:white;
+    display:flex;z-index:10000;box-shadow:0 -2px 10px rgba(0,0,0,0.1);border-top:1px solid #eee;}
+.tab-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    background:none;border:none;cursor:pointer;font-size:10px;color:#888;padding:4px;}
+.tab-btn.active{color:#4285F4;}
+.tab-btn .tab-icon{font-size:22px;margin-bottom:2px;}
+#map{bottom:60px !important;}
+#legends{bottom:60px !important;}
 </style>
 </head>
 <body>
@@ -83,7 +92,7 @@ body{font-family:-apple-system,Arial,sans-serif;overflow:hidden;}
     <h2>US Water Quality</h2>
     <div id="search-row">
         <input id="zipInput" type="number" placeholder="Enter any US ZIP code..."/>
-        <button id="searchBtn" onclick="searchZip()">Search</button>
+        <button id="searchBtn" onclick="switchTab('search');searchZip()">Search</button>
     </div>
     <div id="btn-row">
         <button id="wqiBtn" onclick="toggleWQI()">Water Quality Index</button>
@@ -533,6 +542,61 @@ function findCoolingCenters(){
     });
 }
 
+
+function copyEmail(id){
+    var text = document.getElementById(id).value;
+    navigator.clipboard.writeText(text).then(function(){
+        alert('Email copied to clipboard!');
+    });
+}
+
+function compareZips(){
+    var zip1 = document.getElementById('zip1').value;
+    var zip2 = document.getElementById('zip2').value;
+    if(!zip1 || !zip2){ alert('Please enter both ZIP codes'); return; }
+
+    document.getElementById('compare-results').innerHTML = '<p style="text-align:center;color:#888;">Loading...</p>';
+
+    function getZipData(zip, cb){
+        fetch('https://nominatim.openstreetmap.org/search?postalcode='+zip+'&country=US&format=json')
+        .then(function(r){return r.json();})
+        .then(function(data){
+            if(!data||!data[0]){ cb(null); return; }
+            var lat=parseFloat(data[0].lat), lon=parseFloat(data[0].lon);
+            var nearest=null, minD=999;
+            points.forEach(function(p){
+                var d=Math.sqrt(Math.pow((p.lat-lat)*111,2)+Math.pow((p.lon-lon)*85,2));
+                if(d<minD){minD=d;nearest=p;}
+            });
+            cb(nearest, zip);
+        });
+    }
+
+    getZipData(zip1, function(d1, z1){
+        getZipData(zip2, function(d2, z2){
+            if(!d1||!d2){ 
+                document.getElementById('compare-results').innerHTML='<p style="color:red;">Could not find data for one or both ZIP codes</p>';
+                return;
+            }
+            var params = ['ph','tds','turbidity','hardness','arsenic','nitrate','do','fluoride'];
+            var names = ['pH','TDS','Turbidity','Hardness','Arsenic','Nitrate','Dissolved O2','Fluoride'];
+            var html = '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;font-size:12px;">';
+            html += '<div style="font-weight:700;padding:8px;background:#f5f5f5;border-radius:6px;">Parameter</div>';
+            html += '<div style="font-weight:700;padding:8px;background:#e3f2fd;border-radius:6px;text-align:center;">ZIP '+z1+'</div>';
+            html += '<div style="font-weight:700;padding:8px;background:#e8f5e9;border-radius:6px;text-align:center;">ZIP '+z2+'</div>';
+            params.forEach(function(p,i){
+                var v1 = d1[p]!='N/A'&&d1[p]!==null ? parseFloat(d1[p]).toFixed(2) : 'N/A';
+                var v2 = d2[p]!='N/A'&&d2[p]!==null ? parseFloat(d2[p]).toFixed(2) : 'N/A';
+                html += '<div style="padding:8px;background:#f9f9f9;border-radius:6px;">'+names[i]+'</div>';
+                html += '<div style="padding:8px;background:#e3f2fd;border-radius:6px;text-align:center;">'+v1+'</div>';
+                html += '<div style="padding:8px;background:#e8f5e9;border-radius:6px;text-align:center;">'+v2+'</div>';
+            });
+            html += '</div>';
+            document.getElementById('compare-results').innerHTML = html;
+        });
+    });
+}
+
 function toggleWQI(){
     var p=document.getElementById('wqi-panel');
     p.style.display=p.style.display==='none'||p.style.display===''?'block':'none';
@@ -564,5 +628,115 @@ window.addEventListener('load',function(){
             scales:{y:{title:{display:true,text:'Sites'}}}}});
 });
 </script>
+
+<div id="bottom-tabs">
+    <button class="tab-btn active" onclick="switchTab('map')" id="tab-map">
+        <span class="tab-icon">🗺️</span>Map
+    </button>
+    <button class="tab-btn" onclick="switchTab('search')" id="tab-search">
+        <span class="tab-icon">🔍</span>Search
+    </button>
+    <button class="tab-btn" onclick="switchTab('compare')" id="tab-compare">
+        <span class="tab-icon">🏛️</span>Compare
+    </button>
+    <button class="tab-btn" onclick="switchTab('act')" id="tab-act">
+        <span class="tab-icon">📧</span>Act
+    </button>
+    <button class="tab-btn" onclick="switchTab('about')" id="tab-about">
+        <span class="tab-icon">ℹ️</span>About
+    </button>
+</div>
+
+<div id="compare-panel" style="display:none;position:fixed;top:0;left:0;right:0;bottom:60px;
+    background:#f0f4f8;z-index:5000;overflow-y:auto;padding:15px;">
+    <h2 style="font-size:16px;font-weight:700;margin-bottom:15px;">Compare Counties</h2>
+    <div style="display:flex;gap:10px;margin-bottom:15px;">
+        <input id="zip1" type="number" placeholder="ZIP Code 1" 
+            style="flex:1;padding:10px;border:2px solid #ddd;border-radius:8px;font-size:14px;"/>
+        <input id="zip2" type="number" placeholder="ZIP Code 2"
+            style="flex:1;padding:10px;border:2px solid #ddd;border-radius:8px;font-size:14px;"/>
+    </div>
+    <button onclick="compareZips()" style="width:100%;padding:12px;background:#4285F4;color:white;
+        border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;">Compare</button>
+    <div id="compare-results" style="margin-top:15px;"></div>
+</div>
+
+<div id="act-panel" style="display:none;position:fixed;top:0;left:0;right:0;bottom:60px;
+    background:#f0f4f8;z-index:5000;overflow-y:auto;padding:15px;">
+    <h2 style="font-size:16px;font-weight:700;margin-bottom:5px;">Contact Your Representative</h2>
+    <p style="font-size:13px;color:#666;margin-bottom:15px;">Use these templates to advocate for clean water in your community.</p>
+
+    <div style="background:white;border-radius:12px;padding:15px;margin-bottom:12px;">
+        <h3 style="font-size:14px;font-weight:700;color:#1a1a2e;margin-bottom:8px;">Email Template 1: Request Water Testing</h3>
+        <textarea id="email1" style="width:100%;height:150px;font-size:13px;border:1px solid #ddd;
+            border-radius:8px;padding:10px;resize:none;">Subject: Request for Enhanced Water Quality Testing in Our District
+
+Dear [Representative Name],
+
+I am a constituent writing to request enhanced water quality testing in our district. Recent data from the EPA Water Quality Portal shows concerning levels of [CONTAMINANT] in ZIP code [YOUR ZIP].
+
+As your constituent, I urge you to:
+1. Increase funding for water quality monitoring
+2. Require public disclosure of all water quality test results
+3. Support infrastructure improvements for aging water systems
+
+Clean water is a fundamental right. I look forward to your response.
+
+Sincerely,
+[Your Name]
+[Your Address]</textarea>
+        <button onclick="copyEmail('email1')" style="margin-top:8px;padding:8px 16px;
+            background:#34a853;color:white;border:none;border-radius:8px;font-size:13px;cursor:pointer;">
+            Copy Email
+        </button>
+    </div>
+
+    <div style="background:white;border-radius:12px;padding:15px;margin-bottom:12px;">
+        <h3 style="font-size:14px;font-weight:700;color:#1a1a2e;margin-bottom:8px;">Email Template 2: PFAS Contamination Alert</h3>
+        <textarea id="email2" style="width:100%;height:150px;font-size:13px;border:1px solid #ddd;
+            border-radius:8px;padding:10px;resize:none;">Subject: Urgent: PFAS Contamination Risk in Our Community
+
+Dear [Representative Name],
+
+I am writing with urgent concern about PFAS contamination risk in our water supply. PFAS chemicals, known as forever chemicals, have been linked to cancer, thyroid disease, and immune system damage.
+
+I urge you to:
+1. Enforce the EPA 4 ppt PFAS limit immediately
+2. Fund testing of all public water systems in our district
+3. Hold polluters accountable for cleanup costs
+
+Our community cannot wait. Please take action now.
+
+Sincerely,
+[Your Name]</textarea>
+        <button onclick="copyEmail('email2')" style="margin-top:8px;padding:8px 16px;
+            background:#34a853;color:white;border:none;border-radius:8px;font-size:13px;cursor:pointer;">
+            Copy Email
+        </button>
+    </div>
+</div>
+
+<div id="about-panel" style="display:none;position:fixed;top:0;left:0;right:0;bottom:60px;
+    background:#f0f4f8;z-index:5000;overflow-y:auto;padding:15px;">
+    <h2 style="font-size:16px;font-weight:700;margin-bottom:15px;">About BluewatchAI</h2>
+    <div style="background:white;border-radius:12px;padding:15px;margin-bottom:12px;">
+        <p style="font-size:13px;line-height:1.7;color:#333;">
+        BluewatchAI is an AI-powered water quality app covering 38,979 EPA monitoring stations across all 50 states.
+        Built by Noor Heiba to help communities understand and advocate for clean water.
+        </p>
+    </div>
+    <div style="background:white;border-radius:12px;padding:15px;margin-bottom:12px;">
+        <h3 style="font-size:14px;font-weight:700;margin-bottom:8px;">Data Sources</h3>
+        <p style="font-size:13px;color:#555;line-height:1.7;">EPA Water Quality Portal, OpenMeteo Climate API, Sentinel-2 Satellite Imagery, OpenStreetMap</p>
+    </div>
+    <div style="background:white;border-radius:12px;padding:15px;">
+        <h3 style="font-size:14px;font-weight:700;margin-bottom:8px;">Contact</h3>
+        <p style="font-size:13px;color:#555;">heibanoor81@gmail.com</p>
+        <a href="https://noor-heiba.github.io/Water-quality-map/privacy.html" 
+            style="color:#4285F4;font-size:13px;display:block;margin-top:4px;">Privacy Policy</a>
+        <a href="https://noor-heiba.github.io/Water-quality-map/terms.html"
+            style="color:#4285F4;font-size:13px;display:block;margin-top:4px;">Terms of Service</a>
+    </div>
+</div>
 </body>
 </html>
