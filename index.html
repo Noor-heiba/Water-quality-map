@@ -596,6 +596,22 @@ function compareZips(){
     });
 }
 
+
+function switchTab(tab){
+    document.querySelectorAll('.tab-btn').forEach(function(b){ b.classList.remove('active'); });
+    document.getElementById('tab-'+tab).classList.add('active');
+    var panels = ['compare-panel','act-panel','about-panel'];
+    panels.forEach(function(p){
+        document.getElementById(p).style.display='none';
+    });
+    document.getElementById('wqi-panel').style.display='none';
+    if(tab==='search'){
+        document.getElementById('wqi-panel').style.display='block';
+    } else if(tab!=='map'){
+        document.getElementById(tab+'-panel').style.display='block';
+    }
+}
+
 function toggleWQI(){
     var p=document.getElementById('wqi-panel');
     p.style.display=p.style.display==='none'||p.style.display===''?'block':'none';
