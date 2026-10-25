@@ -119,6 +119,7 @@ body{font-family:-apple-system,Arial,sans-serif;overflow:hidden;}
     <label class="layer-item"><input type="checkbox" onchange="toggleLayer('nitrate',this)"> Nitrate</label>
     <label class="layer-item"><input type="checkbox" onchange="toggleLayer('do',this)"> Dissolved O2</label>
     <label class="layer-item"><input type="checkbox" onchange="toggleLayer('temp',this)"> Temperature</label>
+    <label class="layer-item"><input type="checkbox" id="bw-bloom-cb" onchange="toggleBloom(this)"> Bloom risk (DEMO)</label>
 </div>
 
 <div id="wqi-panel">
@@ -700,6 +701,111 @@ showWQI = function(zip, p, source, state){
         else { c.insertAdjacentHTML('beforeend', out); }
     } catch(e) {}
 };
+
+
+var bwBloom = [];
+var bwBloomLayer = null;
+var bwBloomReady = false;
+var bwBloomColors = {low:'#26a69a', moderate:'#fbbc04', high:'#ef5350', very_high:'#8e0000'};
+var bwBloomLabels = {low:'Low', moderate:'Moderate', high:'High', very_high:'Very high'};
+var bwFeatureNames = {ndci_mean:'chlorophyll index (NDCI)', cyano_proxy:'cyanobacteria color proxy', temp_7d:'recent warm weather', hab_history:'past bloom reports', rainfall_7d:'recent rainfall'};
+
+fetch('bloom_demo.json').then(function(r){ return r.json(); }).then(function(d){
+    bwBloom = d.lakes || [];
+    bwBloomReady = true;
+}).catch(function(e){ console.log('bloom demo data unavailable'); });
+
+function bwBloomGuide(level){
+    if(level === 'low') return 'Few current indicators of bloom risk. Still avoid water that looks scummy or discolored.';
+    if(level === 'moderate') return 'Some indicators suggest elevated bloom risk. Use caution and check official advisories.';
+    return 'Multiple indicators suggest high bloom risk. Avoid contact with discolored or scummy water, keep pets away, and check official advisories.';
+}
+
+function bwBloomPopup(l){
+    var color = bwBloomColors[l.level] || '#888';
+    var label = bwBloomLabels[l.level] || l.level;
+    var pct = Math.round(l.score * 100);
+    var feats = (l.top || []).map(function(n){ return bwFeatureNames[n] || n; }).join(', ');
+    return '<div style="min-width:210px;font-size:12px;line-height:1.5;">' +
+        '<b>' + l.name + '</b><br>' + l.county + ' County, ' + l.state +
+        '<div style="margin:6px 0;padding:5px 7px;border-radius:6px;background:' + color + '33;"><b>Estimated bloom risk: ' + pct + '% (' + label + ')</b></div>' +
+        'Confidence: ' + l.conf + '<br>Main factors: ' + feats + '<br>' + bwBloomGuide(l.level) + '<br>' +
+        '<a href="' + l.adv + '" target="_blank">Official advisory</a>' +
+        '<div style="margin-top:6px;color:#b71c1c;font-weight:700;">DEMO DATA - not real measurements. This is not a toxin test.</div></div>';
+}
+
+function bwBloomBanner(show){
+    var b = document.getElementById('bw-bloom-banner');
+    if(!b){
+        b = document.createElement('div');
+        b.id = 'bw-bloom-banner';
+        b.style.cssText = 'position:fixed;top:138px;left:50%;transform:translateX(-50%);z-index:2500;background:#fff3e0;border:1px solid #ffb74d;color:#e65100;font-size:10px;font-weight:700;padding:4px 10px;border-radius:14px;box-shadow:0 2px 6px rgba(0,0,0,0.2);max-width:92vw;text-align:center;';
+        b.innerHTML = 'Bloom layer: DEMO DATA &nbsp; <span style="color:#26a69a">&#9679;</span> low <span style="color:#d4a017">&#9679;</span> moderate <span style="color:#ef5350">&#9679;</span> high <span style="color:#8e0000">&#9679;</span> very high';
+        document.body.appendChild(b);
+    }
+    b.style.display = show ? 'block' : 'none';
+}
+
+function toggleBloom(cb){
+    if(!cb.checked){
+        if(bwBloomLayer){ map.removeLayer(bwBloomLayer); }
+        bwBloomBanner(false);
+        return;
+    }
+    if(!bwBloomReady){
+        alert('Bloom demo data is still loading - try again in a moment.');
+        cb.checked = false;
+        return;
+    }
+    if(!bwBloomLayer){
+        bwBloomLayer = L.layerGroup();
+        bwBloom.forEach(function(l){
+            var color = bwBloomColors[l.level] || '#888';
+            L.circleMarker([l.lat, l.lon], {radius:8, color:'#ffffff', weight:2, fillColor:color, fillOpacity:0.9})
+                .bindPopup(bwBloomPopup(l)).addTo(bwBloomLayer);
+        });
+    }
+    bwBloomLayer.addTo(map);
+    bwBloomBanner(true);
+}
+
+function bwKm(lat1, lon1, lat2, lon2){
+    var R = 6371;
+    var dLat = (lat2 - lat1) * Math.PI / 180;
+    var dLon = (lon2 - lon1) * Math.PI / 180;
+    var a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
+    return 2 * R * Math.asin(Math.sqrt(a));
+}
+
+function bwShowLake(id){
+    var l = bwBloom.filter(function(x){ return x.id === id; })[0];
+    if(!l) return;
+    var cb = document.getElementById('bw-bloom-cb');
+    if(cb && !cb.checked){ cb.checked = true; toggleBloom(cb); }
+    document.getElementById('wqi-panel').style.display = 'none';
+    map.setView([l.lat, l.lon], 10);
+}
+
+function bwBloomCard(p, source, state){
+    if(!bwBloomReady || typeof searchMarker === 'undefined' || !searchMarker) return '';
+    var ll = searchMarker.getLatLng();
+    var best = null, bd = 1e9;
+    bwBloom.forEach(function(l){
+        var d = bwKm(ll.lat, ll.lng, l.lat, l.lon);
+        if(d < bd){ bd = d; best = l; }
+    });
+    if(!best || bd > 150) return '';
+    var color = bwBloomColors[best.level] || '#888';
+    var label = bwBloomLabels[best.level] || best.level;
+    var pct = Math.round(best.score * 100);
+    return '<div style="margin:8px 0;padding:10px;border-radius:10px;border:1px solid #ddd;font-size:12px;line-height:1.6;">' +
+        '<div style="font-weight:700;margin-bottom:2px;">Nearest monitored lake</div>' +
+        best.name + ' (' + bd.toFixed(0) + ' km away)<br>' +
+        'Estimated bloom risk: <b style="color:' + color + ';">' + pct + '% (' + label + ')</b><br>' +
+        '<span style="color:#b71c1c;font-weight:700;">DEMO DATA - not real measurements</span><br>' +
+        '<button data-id="' + best.id + '" onclick="bwShowLake(this.dataset.id)" style="margin-top:6px;padding:6px 12px;border:none;border-radius:8px;background:#0a6ebd;color:white;font-size:12px;cursor:pointer;">Show on map</button></div>';
+}
+bwExtras.push(bwBloomCard);
 
 function toggleWQI(){
     var p=document.getElementById('wqi-panel');
