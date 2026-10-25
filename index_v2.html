@@ -96,7 +96,7 @@ body{font-family:-apple-system,Arial,sans-serif;overflow:hidden;}
         <button id="wqiBtn" onclick="toggleWQI()">Water Quality Index</button>
         <button id="dashBtn" onclick="document.getElementById('dashboard').style.display='block'">Analysis Dashboard</button>
         <button id="layerBtn" onclick="toggleDrawer()">Layers</button>
-        <button id="coolBtn" onclick="findCoolingCenters()" style="padding:8px 12px;background:#0277bd;color:white;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;">Cooling Centers</button>
+        <button id="bloomBtn" onclick="bwBloomButton()" style="padding:8px 12px;background:#2e7d32;color:white;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;">Blooms (Demo)</button>
         <button id="heatBtn" onclick="toggleHeat()" style="padding:8px 12px;background:#e53935;color:white;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;">Heat Map</button>
         
     </div>
@@ -806,6 +806,24 @@ function bwBloomCard(p, source, state){
         '<button data-id="' + best.id + '" onclick="bwShowLake(this.dataset.id)" style="margin-top:6px;padding:6px 12px;border:none;border-radius:8px;background:#0a6ebd;color:white;font-size:12px;cursor:pointer;">Show on map</button></div>';
 }
 bwExtras.push(bwBloomCard);
+
+
+function bwBloomButton(){
+    var cb = document.getElementById('bw-bloom-cb');
+    if(!cb) return;
+    cb.checked = !cb.checked;
+    toggleBloom(cb);
+}
+
+var _bwOrigToggleBloom = toggleBloom;
+toggleBloom = function(cb){
+    _bwOrigToggleBloom(cb);
+    var b = document.getElementById('bloomBtn');
+    if(b){
+        b.innerText = cb.checked ? 'Hide Blooms' : 'Blooms (Demo)';
+        b.style.background = cb.checked ? '#333333' : '#2e7d32';
+    }
+};
 
 function toggleWQI(){
     var p=document.getElementById('wqi-panel');
