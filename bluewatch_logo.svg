@@ -1,0 +1,7 @@
+<svg width="320" height="90" viewBox="0 0 320 90" xmlns="http://www.w3.org/2000/svg">
+<rect x="0" y="0" width="320" height="90" rx="45" fill="#0d1117"/>
+<rect x="18" y="13" width="64" height="64" rx="13" fill="#3f7b9b"/>
+<path d="M50 23 C50 23 33 42 33 53 C33 62.4 40.6 70 50 70 C59.4 70 67 62.4 67 53 C67 42 50 23 50 23 Z" fill="#ffffff"/>
+<path d="M38 55 Q44 50 50 55 T62 55" fill="none" stroke="#3f7b9b" stroke-width="3" stroke-linecap="round"/>
+<text x="98" y="56" font-family="-apple-system, Helvetica, Arial, sans-serif" font-size="27" font-weight="700" fill="#ffffff">BlueWatch AI</text>
+</svg>

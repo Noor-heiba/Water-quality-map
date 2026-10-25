@@ -83,11 +83,21 @@ body{font-family:-apple-system,Arial,sans-serif;overflow:hidden;}
 .tab-btn .tab-icon{font-size:22px;margin-bottom:2px;}
 #map{bottom:60px !important;}
 #legends{bottom:60px !important;}
+
+/* bw-layout-1 */
+#topbar{height:142px !important;}
+#map{top:142px !important;}
+#layer-drawer{top:142px !important;}
+#wqi-panel{top:142px !important;}
+#bw-bloom-banner{top:150px !important;}
+#legends .legend-item:first-child{margin-left:auto;}
+#legends .legend-item:last-child{margin-right:auto;}
+#bw-logo{height:30px;display:block;margin-bottom:6px;}
 </style>
 </head>
 <body>
 <div id="topbar">
-    <h2>US Water Quality</h2>
+    <img id="bw-logo" src="bluewatch_logo.svg" alt="BlueWatch AI" onerror="this.outerHTML='<h2>US Water Quality</h2>'">
     <div id="search-row">
         <input id="zipInput" type="number" placeholder="Enter any US ZIP code..."/>
         <button id="searchBtn" onclick="switchTab('search');searchZip()">Search</button>
