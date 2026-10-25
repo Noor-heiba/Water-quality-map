@@ -102,6 +102,10 @@ body{font-family:-apple-system,Arial,sans-serif;overflow:hidden;}
 #legends .grad-labels{font-size:11px !important;}
 .tab-btn{font-size:12px !important;}
 @media (max-width:700px){#legends .legend-item{flex:0 0 130px !important;}}
+
+/* bw-compare */
+#compare-panel{bottom:70px !important;padding-bottom:24px !important;}
+#compare-results{padding-bottom:24px;}
 </style>
 </head>
 <body>
@@ -943,6 +947,209 @@ function bwOfficial(p, source, state){
 }
 bwExtras.push(bwOfficial);
 
+
+var bwCmpChart = null;
+var bwCmpParams = [
+    {k:'tds', name:'Dissolved solids', lim:500, unit:'mg/L', why:'High dissolved solids can make water taste salty or bitter.'},
+    {k:'hardness', name:'Hardness', lim:200, unit:'mg/L', why:'Harder water leaves scale in water heaters and pipes.'},
+    {k:'turbidity', name:'Turbidity', lim:4, unit:'NTU', why:'Cloudier water can carry sediment and microbes.'},
+    {k:'arsenic', name:'Arsenic', lim:0.01, unit:'mg/L', why:'Arsenic above 0.01 mg/L is a long-term health concern.'},
+    {k:'nitrate', name:'Nitrate', lim:10, unit:'mg/L', why:'Nitrate above 10 mg/L is a health risk, mainly for infants.'},
+    {k:'fluoride', name:'Fluoride', lim:1.5, unit:'mg/L', why:'Fluoride above 1.5 mg/L is over the WHO guideline.'},
+    {k:'iron', name:'Iron', lim:300, unit:'ug/L', why:'Iron above 300 ug/L stains laundry and tastes metallic.'}
+];
+var bwCmpDigits = {ph:1, tds:0, turbidity:1, temp:1, hardness:0, conductance:0, arsenic:4, iron:0, fluoride:2, nitrate:1, 'do':1};
+var bwCmpNames = {ph:'pH', tds:'TDS (mg/L)', turbidity:'Turbidity (NTU)', temp:'Temperature (C)', hardness:'Hardness (mg/L)', conductance:'Conductance (uS/cm)', arsenic:'Arsenic (mg/L)', iron:'Iron (ug/L)', fluoride:'Fluoride (mg/L)', nitrate:'Nitrate (mg/L)', 'do':'Dissolved oxygen (mg/L)'};
+
+function bwCmpNum(v){
+    if(v === undefined || v === null || v === 'N/A' || v === '') return null;
+    var n = parseFloat(v);
+    return isNaN(n) ? null : n;
+}
+function bwCmpFmt(v, k){
+    if(v === null) return '-';
+    return v.toFixed(bwCmpDigits[k] === undefined ? 1 : bwCmpDigits[k]);
+}
+function bwCmpMean(arr){
+    var a = (arr || []).filter(function(x){ return x !== null && x !== undefined && !isNaN(x); });
+    if(!a.length) return null;
+    return a.reduce(function(s, x){ return s + x; }, 0) / a.length;
+}
+
+function bwCmpGet(zip, cb){
+    fetch('https://nominatim.openstreetmap.org/search?postalcode=' + encodeURIComponent(zip) + '&country=US&format=json')
+    .then(function(r){ return r.json(); })
+    .then(function(data){
+        if(!data || !data[0]){ cb(null); return; }
+        var lat = parseFloat(data[0].lat), lon = parseFloat(data[0].lon);
+        var nearest = null, minD = 1e9;
+        points.forEach(function(p){
+            var d = Math.sqrt(Math.pow((p.lat - lat) * 111, 2) + Math.pow((p.lon - lon) * 85, 2));
+            if(d < minD){ minD = d; nearest = p; }
+        });
+        if(!nearest){ cb(null); return; }
+        var out = {zip: zip, d: JSON.parse(JSON.stringify(nearest)), dist: minD};
+        var url = 'https://api.open-meteo.com/v1/forecast?latitude=' + lat + '&longitude=' + lon + '&daily=temperature_2m_max,precipitation_sum&hourly=soil_moisture_0_to_1cm&timezone=auto&past_days=30';
+        fetch(url).then(function(r){ return r.json(); }).then(function(om){
+            var avgT = bwCmpMean(om.daily.temperature_2m_max);
+            var avgP = bwCmpMean(om.daily.precipitation_sum);
+            var soil = bwCmpMean(om.hourly.soil_moisture_0_to_1cm);
+            var w = minD < 5 ? 1 : (minD < 20 ? 1 - (minD - 5) / 15 : 0);
+            if(avgT !== null && avgP !== null){
+                var mlPH = 6.5 + avgT * 0.01 - avgP * 0.005;
+                var mlTurb = avgP * 4;
+                var nph = bwCmpNum(nearest.ph), nturb = bwCmpNum(nearest.turbidity);
+                out.d.ph = nph !== null ? w * nph + (1 - w) * mlPH : mlPH;
+                out.d.turbidity = nturb !== null ? w * nturb + (1 - w) * mlTurb : mlTurb;
+                if(bwCmpNum(nearest.temp) === null) out.d.temp = avgT * 0.7;
+            }
+            if(soil !== null){
+                var mlTDS = soil * 1800 + 50;
+                var ntds = bwCmpNum(nearest.tds);
+                out.d.tds = ntds !== null ? w * ntds + (1 - w) * mlTDS : mlTDS;
+            }
+            cb(out);
+        }).catch(function(){ cb(out); });
+    }).catch(function(){ cb(null); });
+}
+
+function bwCmpCard(x, w, accent){
+    var lab = w === null ? 'Not enough data' : getWQILabel(w);
+    var col = w === null ? '#888888' : getWQIColor(w);
+    var src = x.dist < 5 ? 'Measured at the nearest EPA station' : 'Estimated from the nearest station plus climate data';
+    var conf = typeof bwConfidence === 'function' ? bwConfidence(x.d, 'x (' + x.dist.toFixed(1) + ' km)') : '';
+    return '<div style="background:white;border-radius:12px;padding:12px;border-top:4px solid ' + accent + ';text-align:center;">' +
+        '<div style="font-size:12px;font-weight:700;">ZIP ' + x.zip + '</div>' +
+        '<div style="font-size:36px;font-weight:700;color:' + col + ';">' + (w === null ? '-' : w) + '</div>' +
+        '<div style="font-size:12px;font-weight:600;color:' + col + ';">' + lab + '</div>' +
+        '<div style="font-size:11px;color:#777;margin-top:4px;">' + src + '</div>' + conf + '</div>';
+}
+
+function bwCmpRender(a, b, box){
+    var wa = calcWQI(a.d), wb = calcWQI(b.d);
+    var head;
+    if(wa === null || wb === null){
+        head = 'Not enough measured values to score one of these places.';
+    } else if(Math.abs(wa - wb) < 5){
+        head = 'ZIP ' + a.zip + ' and ZIP ' + b.zip + ' score about the same (' + wa + ' and ' + wb + ').';
+    } else {
+        var hi = wa > wb ? a : b;
+        head = 'ZIP ' + hi.zip + ' scores higher (' + Math.max(wa, wb) + ' vs ' + Math.min(wa, wb) + ').';
+    }
+
+    var rows = [], labels = [], da = [], db = [];
+    bwCmpParams.forEach(function(P){
+        var va = bwCmpNum(a.d[P.k]), vb = bwCmpNum(b.d[P.k]);
+        if(va === null && vb === null) return;
+        labels.push(P.name);
+        da.push(va === null ? null : Math.min(va / P.lim * 100, 200));
+        db.push(vb === null ? null : Math.min(vb / P.lim * 100, 200));
+        if(va !== null && vb !== null){
+            rows.push({P: P, va: va, vb: vb, diff: Math.abs(va - vb) / P.lim * 100});
+        }
+    });
+    rows.sort(function(x, y){ return y.diff - x.diff; });
+
+    var bullets = [];
+    var pha = bwCmpNum(a.d.ph), phb = bwCmpNum(b.d.ph);
+    if(pha !== null && phb !== null){
+        bullets.push('<li style="margin-bottom:6px;"><b>pH:</b> ' + pha.toFixed(1) + ' vs ' + phb.toFixed(1) + ' (guideline range 6.5 to 8.5).</li>');
+    }
+    rows.forEach(function(r){
+        if(bullets.length >= 4 || r.diff < 15) return;
+        bullets.push('<li style="margin-bottom:6px;"><b>' + r.P.name + ':</b> ' + bwCmpFmt(r.va, r.P.k) + ' vs ' + bwCmpFmt(r.vb, r.P.k) + ' ' + r.P.unit + ' (ZIP ' + a.zip + ' vs ' + b.zip + '). ' + r.P.why + '</li>');
+    });
+    var diffHtml = bullets.length
+        ? '<ul style="margin:6px 0 0 0;padding-left:18px;">' + bullets.join('') + '</ul>'
+        : '<div style="margin-top:6px;">The values we can compare are close, or the two places share too little data.</div>';
+
+    var flagged = [];
+    [a, b].forEach(function(x){
+        ['arsenic', 'nitrate', 'fluoride'].forEach(function(k){
+            var v = bwCmpNum(x.d[k]);
+            var P = bwCmpParams.filter(function(q){ return q.k === k; })[0];
+            if(v !== null && v > P.lim) flagged.push(k + ' in ZIP ' + x.zip);
+        });
+    });
+    var healthHtml = flagged.length
+        ? '<div style="margin-top:8px;padding:8px;border-radius:8px;background:#ffebee;color:#b71c1c;font-size:12px;">Above a health guideline: ' + flagged.join(', ') + '. Test your own tap water and read your utility report.</div>'
+        : '';
+
+    var keys = ['ph', 'tds', 'turbidity', 'temp', 'hardness', 'conductance', 'arsenic', 'iron', 'fluoride', 'nitrate', 'do'];
+    var trs = keys.map(function(k){
+        var va = bwCmpNum(a.d[k]), vb = bwCmpNum(b.d[k]);
+        if(va === null && vb === null) return '';
+        return '<tr><td style="padding:5px 4px;border-bottom:1px solid #eee;">' + bwCmpNames[k] + '</td>' +
+            '<td style="padding:5px 4px;border-bottom:1px solid #eee;text-align:right;">' + bwCmpFmt(va, k) + '</td>' +
+            '<td style="padding:5px 4px;border-bottom:1px solid #eee;text-align:right;">' + bwCmpFmt(vb, k) + '</td></tr>';
+    }).join('');
+
+    var chartH = Math.max(200, labels.length * 52 + 70);
+    var chartHtml = labels.length
+        ? '<div style="background:white;border-radius:12px;padding:12px;margin-top:10px;"><div style="font-size:13px;font-weight:700;margin-bottom:6px;">How close to the guideline limit</div><div style="position:relative;height:' + chartH + 'px;"><canvas id="bwCmpCanvas"></canvas></div><div style="font-size:11px;color:#777;margin-top:4px;">100% is the guideline limit (red dashed line). Hardness has no health limit, so its line is a comfort level.</div></div>'
+        : '';
+
+    box.innerHTML =
+        '<div style="background:#e3f2fd;border-radius:12px;padding:12px;font-size:14px;font-weight:700;text-align:center;">' + head + '</div>' +
+        '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-top:10px;">' + bwCmpCard(a, wa, '#4285F4') + bwCmpCard(b, wb, '#34a853') + '</div>' +
+        chartHtml +
+        '<div style="background:white;border-radius:12px;padding:12px;margin-top:10px;font-size:12px;line-height:1.5;"><div style="font-size:13px;font-weight:700;">What is different</div>' + diffHtml + healthHtml + '</div>' +
+        '<details style="background:white;border-radius:12px;padding:12px;margin-top:10px;font-size:12px;"><summary style="font-weight:700;cursor:pointer;">See all values</summary>' +
+        '<table style="width:100%;border-collapse:collapse;margin-top:6px;"><tr><th style="text-align:left;padding:4px;">Parameter</th><th style="text-align:right;padding:4px;">ZIP ' + a.zip + '</th><th style="text-align:right;padding:4px;">ZIP ' + b.zip + '</th></tr>' + trs + '</table></details>' +
+        '<div style="font-size:11px;color:#777;margin:10px 2px 0 2px;line-height:1.5;">Values come from the nearest EPA monitoring station and, where it is far away, a climate-based estimate. This is not a tap water test.</div>';
+
+    if(bwCmpChart){ try { bwCmpChart.destroy(); } catch(e) {} bwCmpChart = null; }
+    if(labels.length && typeof Chart !== 'undefined'){
+        try {
+            bwCmpChart = new Chart(document.getElementById('bwCmpCanvas'), {
+                type: 'bar',
+                data: {labels: labels, datasets: [
+                    {label: 'ZIP ' + a.zip, data: da, backgroundColor: '#4285F4'},
+                    {label: 'ZIP ' + b.zip, data: db, backgroundColor: '#34a853'}
+                ]},
+                options: {
+                    indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+                    scales: {x: {min: 0, max: 200, title: {display: true, text: '% of guideline limit'}}},
+                    plugins: {legend: {position: 'bottom'}}
+                },
+                plugins: [{
+                    id: 'bwLimit',
+                    afterDraw: function(ch){
+                        var x = ch.scales.x.getPixelForValue(100);
+                        var c = ch.ctx;
+                        c.save();
+                        c.strokeStyle = '#ea4335';
+                        c.setLineDash([5, 4]);
+                        c.lineWidth = 1.5;
+                        c.beginPath();
+                        c.moveTo(x, ch.chartArea.top);
+                        c.lineTo(x, ch.chartArea.bottom);
+                        c.stroke();
+                        c.restore();
+                    }
+                }]
+            });
+        } catch(e) {}
+    }
+}
+
+compareZips = function(){
+    var z1 = document.getElementById('zip1').value.trim();
+    var z2 = document.getElementById('zip2').value.trim();
+    if(!z1 || !z2){ alert('Please enter both ZIP codes'); return; }
+    var box = document.getElementById('compare-results');
+    box.innerHTML = '<p style="text-align:center;color:#888;">Comparing... this takes a few seconds.</p>';
+    bwCmpGet(z1, function(a){
+        bwCmpGet(z2, function(b){
+            if(!a || !b){
+                box.innerHTML = '<p style="color:#b71c1c;text-align:center;">Could not find data for one or both ZIP codes.</p>';
+                return;
+            }
+            bwCmpRender(a, b, box);
+        });
+    });
+};
+
 function toggleWQI(){
     var p=document.getElementById('wqi-panel');
     p.style.display=p.style.display==='none'||p.style.display===''?'block':'none';
@@ -995,7 +1202,7 @@ window.addEventListener('load',function(){
 
 <div id="compare-panel" style="display:none;position:fixed;top:0;left:0;right:0;bottom:60px;
     background:#f0f4f8;z-index:5000;overflow-y:auto;padding:15px;">
-    <h2 style="font-size:16px;font-weight:700;margin-bottom:15px;">Compare Counties</h2>
+    <h2 style="font-size:16px;font-weight:700;margin-bottom:15px;">Compare two ZIP codes</h2>
     <div style="display:flex;gap:10px;margin-bottom:15px;">
         <input id="zip1" type="number" placeholder="ZIP Code 1" 
             style="flex:1;padding:10px;border:2px solid #ddd;border-radius:8px;font-size:14px;"/>
