@@ -834,6 +834,76 @@ function bwNote(p, source, state){
 }
 bwExtras.push(bwNote);
 
+
+function bwNum(v){
+    if(v === undefined || v === null || v === 'N/A' || v === '') return null;
+    var n = parseFloat(v);
+    return isNaN(n) ? null : n;
+}
+
+function bwRow(label, text){
+    return '<div style="margin-top:6px;"><b>' + label + '</b><br>' + text + '</div>';
+}
+
+function bwMeaning(p, source, state){
+    var ph = bwNum(p.ph), tds = bwNum(p.tds), turb = bwNum(p.turbidity), hard = bwNum(p.hardness);
+    var ars = bwNum(p.arsenic), nit = bwNum(p.nitrate), fl = bwNum(p.fluoride), iron = bwNum(p.iron);
+    var dox = bwNum(p['do']), cond = bwNum(p.conductance);
+    var known = [ph, tds, turb, hard, ars, nit, fl, iron, dox, cond].filter(function(x){ return x !== null; }).length;
+
+    var health = [], taste = [];
+    if(ars !== null && ars > 0.01) health.push('arsenic ' + ars + ' mg/L (EPA limit 0.01)');
+    if(nit !== null && nit > 10) health.push('nitrate ' + nit + ' mg/L (EPA limit 10, mainly a risk for infants)');
+    if(fl !== null && fl > 1.5) health.push('fluoride ' + fl + ' mg/L (WHO guideline 1.5)');
+    if(tds !== null && tds > 500) taste.push('dissolved solids ' + Math.round(tds) + ' mg/L (above 500, can taste salty)');
+    if(iron !== null && iron > 300) taste.push('iron ' + Math.round(iron) + ' ug/L (above 300, metallic taste and stains)');
+    if(ph !== null && (ph < 6.5 || ph > 8.5)) taste.push('pH ' + ph.toFixed(1) + ' (outside 6.5 to 8.5)');
+    if(turb !== null && turb > 4) taste.push('turbidity ' + turb.toFixed(1) + ' NTU (cloudy)');
+
+    var drink;
+    if(health.length){
+        drink = 'Above a health guideline: ' + health.join('; ') + '. This station may not match your tap, so test your tap water and read your utility report before drinking.';
+    } else if(taste.length){
+        drink = 'Above comfort guidelines: ' + taste.join('; ') + '. A filter may help.';
+    } else if(known < 3){
+        drink = 'Too few measured values here to say anything about drinking water.';
+    } else {
+        drink = 'No guideline exceedances in the values measured here. Still check your utility report.';
+    }
+
+    var flags = [];
+    if(dox !== null && dox < 5) flags.push('low dissolved oxygen (' + dox.toFixed(1) + ' mg/L)');
+    if(turb !== null && turb > 4) flags.push('cloudy water (' + turb.toFixed(1) + ' NTU)');
+    if(nit !== null && nit > 10) flags.push('high nitrate (' + nit + ' mg/L)');
+    if(ph !== null && (ph < 6.5 || ph > 8.5)) flags.push('unusual pH (' + ph.toFixed(1) + ')');
+    var pets;
+    if(flags.length){
+        pets = 'Red flags: ' + flags.join('; ') + '. Keep pets from drinking this water.';
+    } else {
+        pets = 'No red flags in these values, but they do not show algal toxins. Keep pets and kids away from green, scummy or foul-smelling water. The Blooms button shows nearby lakes.';
+    }
+
+    var home = [];
+    if(hard !== null && hard > 150) home.push('hard water (' + Math.round(hard) + ' mg/L) leaves scale in heaters and pipes');
+    if(iron !== null && iron > 300) home.push('iron can stain laundry and fixtures');
+    if((cond !== null && cond > 1500) || (tds !== null && tds > 1000)) home.push('salty water can stress some plants');
+    if(ph !== null && ph < 6.5) home.push('acidic water can corrode pipes');
+    var homeText;
+    if(home.length){
+        homeText = home.join('; ') + '.';
+    } else if(known < 3){
+        homeText = 'Too few measured values here to say.';
+    } else {
+        homeText = 'Nothing in these values points to scaling, staining or salty water.';
+    }
+
+    return '<div style="margin:8px 0;padding:10px;border-radius:10px;border:1px solid #ddd;font-size:12px;line-height:1.5;">' +
+        '<div style="font-weight:700;font-size:13px;">What this means for you</div>' +
+        '<div style="color:#777;font-size:11px;">Based on ' + known + ' measured values. Guidelines, not a lab test.</div>' +
+        bwRow('Drinking', drink) + bwRow('Pets and swimming', pets) + bwRow('Home and garden', homeText) + '</div>';
+}
+bwExtras.push(bwMeaning);
+
 function toggleWQI(){
     var p=document.getElementById('wqi-panel');
     p.style.display=p.style.display==='none'||p.style.display===''?'block':'none';
