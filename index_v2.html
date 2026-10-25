@@ -665,6 +665,42 @@ function switchTab(tab){
     }
 }
 
+
+function bwConfidence(p, source){
+    var keys = ['ph','tds','turbidity','temp','hardness','conductance','arsenic','iron','fluoride','manganese','nitrate','do'];
+    var n = 0;
+    keys.forEach(function(k){
+        var v = p[k];
+        if(v !== undefined && v !== null && v !== 'N/A' && v !== '' && !isNaN(parseFloat(v))) n++;
+    });
+    var m = /([0-9.]+)\s*km/.exec(source || '');
+    var d = m ? parseFloat(m[1]) : 999;
+    var level = 'Low', color = '#ea4335';
+    if(d < 5 && n >= 5){ level = 'High'; color = '#34a853'; }
+    else if(d < 20 && n >= 3){ level = 'Medium'; color = '#fbbc04'; }
+    var dist = d < 999 ? d.toFixed(0) + ' km' : 'unknown distance';
+    return '<div style="margin:8px 0;padding:8px;border-radius:8px;background:#f5f5f5;font-size:12px;text-align:center;">' +
+        'Confidence: <b style="color:' + color + ';">' + level + '</b> - ' + n + ' of 12 parameters measured, nearest station ' + dist + ' away</div>';
+}
+
+var bwExtras = [];
+bwExtras.push(bwConfidence);
+
+var _bwOrigShowWQI = showWQI;
+showWQI = function(zip, p, source, state){
+    _bwOrigShowWQI(zip, p, source, state);
+    try {
+        var c = document.getElementById('wqi-content');
+        var out = '';
+        bwExtras.forEach(function(f){
+            try { out += f(p, source, state); } catch(e) {}
+        });
+        var btn = c.querySelector('button[onclick="showFilterRec()"]');
+        if(btn){ btn.insertAdjacentHTML('beforebegin', out); }
+        else { c.insertAdjacentHTML('beforeend', out); }
+    } catch(e) {}
+};
+
 function toggleWQI(){
     var p=document.getElementById('wqi-panel');
     p.style.display=p.style.display==='none'||p.style.display===''?'block':'none';
