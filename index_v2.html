@@ -276,8 +276,8 @@ function searchZip(){
         document.getElementById('loading').style.display='none';
         var source;
         if(nearDist < 5) source='EPA Direct ('+nearDist.toFixed(1)+'km)';
-        else if(nearDist < 20) source='Blended EPA+ML ('+nearDist.toFixed(1)+'km)';
-        else source='ML Prediction (nearest EPA '+nearDist.toFixed(0)+'km)';
+        else if(nearDist < 20) source='Estimated: EPA + climate ('+nearDist.toFixed(1)+'km)';
+        else source='Climate-based estimate (nearest EPA '+nearDist.toFixed(0)+'km)';
         showWQI(zip, nearest, source, nearest.state);
 
         // Background OpenMeteo fetch for blending (non-blocking)
@@ -383,14 +383,14 @@ function showFilterRec(){
         var ph=parseFloat(p.ph);
         if(ph<6.5){concerns.push({msg:'pH '+ph.toFixed(2)+' is too acidic (below 6.5) - may corrode pipes and leach metals',level:'high'});filters.add('pH Neutralizer Filter');}
         else if(ph>8.5){concerns.push({msg:'pH '+ph.toFixed(2)+' is too alkaline (above 8.5) - may cause scaling',level:'medium'});filters.add('Reverse Osmosis System');}
-        else{concerns.push({msg:'pH '+ph.toFixed(2)+' is within safe range (6.5-8.5)',level:'ok'});}
+        else{concerns.push({msg:'pH '+ph.toFixed(2)+' is within guideline range (6.5-8.5)',level:'ok'});}
     }
     // TDS
     if(p.tds && p.tds!='N/A'){
         var tds=parseFloat(p.tds);
         if(tds>500){concerns.push({msg:'TDS '+Math.round(tds)+' mg/L exceeds WHO limit of 500 mg/L',level:'high'});filters.add('Reverse Osmosis System');filters.delete('Basic Carbon Filter (e.g. Brita)');}
         else if(tds>300){concerns.push({msg:'TDS '+Math.round(tds)+' mg/L is elevated but acceptable',level:'medium'});}
-        else{concerns.push({msg:'TDS '+Math.round(tds)+' mg/L is within safe range',level:'ok'});}
+        else{concerns.push({msg:'TDS '+Math.round(tds)+' mg/L is within guideline range',level:'ok'});}
     }
     // Turbidity
     if(p.turbidity && p.turbidity!='N/A'){
@@ -410,13 +410,13 @@ function showFilterRec(){
     if(p.arsenic && p.arsenic!='N/A'){
         var ars=parseFloat(p.arsenic);
         if(ars>0.01){concerns.push({msg:'Arsenic '+ars+' mg/L EXCEEDS EPA limit of 0.01 mg/L - HEALTH RISK',level:'critical'});filters.add('Reverse Osmosis System');filters.add('Activated Alumina Filter');filters.delete('Basic Carbon Filter (e.g. Brita)');}
-        else{concerns.push({msg:'Arsenic '+ars+' mg/L is within safe range',level:'ok'});}
+        else{concerns.push({msg:'Arsenic '+ars+' mg/L is within guideline range',level:'ok'});}
     }
     // Nitrate
     if(p.nitrate && p.nitrate!='N/A'){
         var nit=parseFloat(p.nitrate);
         if(nit>10){concerns.push({msg:'Nitrate '+nit+' mg/L exceeds EPA limit of 10 mg/L - dangerous for infants',level:'critical'});filters.add('Reverse Osmosis System');filters.delete('Basic Carbon Filter (e.g. Brita)');}
-        else{concerns.push({msg:'Nitrate '+nit+' mg/L is within safe range',level:'ok'});}
+        else{concerns.push({msg:'Nitrate '+nit+' mg/L is within guideline range',level:'ok'});}
     }
     // Iron
     if(p.iron && p.iron!='N/A'){
@@ -428,7 +428,7 @@ function showFilterRec(){
     if(p.fluoride && p.fluoride!='N/A'){
         var fl=parseFloat(p.fluoride);
         if(fl>1.5){concerns.push({msg:'Fluoride '+fl+' mg/L exceeds WHO limit of 1.5 mg/L',level:'high'});filters.add('Reverse Osmosis System');filters.delete('Basic Carbon Filter (e.g. Brita)');}
-        else{concerns.push({msg:'Fluoride '+fl+' mg/L is within safe range',level:'ok'});}
+        else{concerns.push({msg:'Fluoride '+fl+' mg/L is within guideline range',level:'ok'});}
     }
     // Manganese
     if(p.manganese && p.manganese!='N/A'){
@@ -824,6 +824,15 @@ toggleBloom = function(cb){
         b.style.background = cb.checked ? '#333333' : '#2e7d32';
     }
 };
+
+
+function bwNote(p, source, state){
+    return '<div style="margin:8px 0;padding:8px;border-radius:8px;background:#fff8e1;border-left:4px solid #ffc107;font-size:11px;line-height:1.5;color:#555;">' +
+        'This shows the nearest monitoring station, which may be a river, lake or well, not your tap. ' +
+        'Estimated values use climate data, not a lab test. For drinking water, check your utility report: ' +
+        '<a href="https://www.epa.gov/ccr" target="_blank">EPA water report finder</a>.</div>';
+}
+bwExtras.push(bwNote);
 
 function toggleWQI(){
     var p=document.getElementById('wqi-panel');
