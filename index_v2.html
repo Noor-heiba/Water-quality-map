@@ -904,6 +904,26 @@ function bwMeaning(p, source, state){
 }
 bwExtras.push(bwMeaning);
 
+
+var bwStatePages = {
+    CA: 'https://mywaterquality.ca.gov/habs/',
+    NY: 'https://dec.ny.gov/environmental-protection/water/water-quality/harmful-algal-blooms',
+    UT: 'https://deq.utah.gov/water-quality/harmful-algal-blooms-home',
+    MT: 'https://deq.mt.gov/water/Programs/hab',
+    NJ: 'https://dep.nj.gov/wms/bears/cyanohab/'
+};
+
+function bwOfficial(p, source, state){
+    var url = bwStatePages[state];
+    var label = url ? ('Official ' + state + ' algal bloom advisories') : 'EPA information on harmful algal blooms';
+    if(!url) url = 'https://www.epa.gov/cyanohabs';
+    return '<div style="margin:8px 0;padding:8px;border-radius:8px;background:#e3f2fd;font-size:12px;line-height:1.6;">' +
+        '<b>Official guidance</b><br>' +
+        '<a href="' + url + '" target="_blank">' + label + '</a><br>' +
+        '<a href="https://www.epa.gov/ccr" target="_blank">Find your drinking water report (EPA)</a></div>';
+}
+bwExtras.push(bwOfficial);
+
 function toggleWQI(){
     var p=document.getElementById('wqi-panel');
     p.style.display=p.style.display==='none'||p.style.display===''?'block':'none';
