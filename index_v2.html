@@ -106,6 +106,9 @@ body{font-family:-apple-system,Arial,sans-serif;overflow:hidden;}
 /* bw-compare */
 #compare-panel{bottom:70px !important;padding-bottom:24px !important;}
 #compare-results{padding-bottom:24px;}
+
+/* bw-act */
+#act-panel{bottom:70px !important;padding-bottom:24px !important;}
 </style>
 </head>
 <body>
@@ -1148,6 +1151,202 @@ compareZips = function(){
             bwCmpRender(a, b, box);
         });
     });
+};
+
+
+var bwActTopic = 'report';
+var bwActName = '';
+var bwActArea = '';
+
+function bwActNum(v){
+    if(v === undefined || v === null || v === 'N/A' || v === '') return null;
+    var n = parseFloat(v);
+    return isNaN(n) ? null : n;
+}
+
+function bwActInfo(){
+    var L = window.bwLast;
+    if(!L || !L.p) return null;
+    var p = L.p;
+    var ph = bwActNum(p.ph), tds = bwActNum(p.tds), turb = bwActNum(p.turbidity), hard = bwActNum(p.hardness);
+    var ars = bwActNum(p.arsenic), nit = bwActNum(p.nitrate), fl = bwActNum(p.fluoride), iron = bwActNum(p.iron), dox = bwActNum(p['do']);
+    var lines = [], health = [];
+    function add(label, v, unit, d){
+        if(v !== null) lines.push('- ' + label + ': ' + v.toFixed(d) + (unit ? ' ' + unit : ''));
+    }
+    add('pH', ph, '', 1);
+    add('Dissolved solids (TDS)', tds, 'mg/L', 0);
+    add('Hardness', hard, 'mg/L', 0);
+    add('Turbidity', turb, 'NTU', 1);
+    add('Arsenic', ars, 'mg/L', 4);
+    add('Nitrate', nit, 'mg/L', 1);
+    add('Fluoride', fl, 'mg/L', 2);
+    add('Iron', iron, 'ug/L', 0);
+    add('Dissolved oxygen', dox, 'mg/L', 1);
+    if(ars !== null && ars > 0.01) health.push('arsenic ' + ars.toFixed(4) + ' mg/L (EPA limit 0.01)');
+    if(nit !== null && nit > 10) health.push('nitrate ' + nit.toFixed(1) + ' mg/L (EPA limit 10)');
+    if(fl !== null && fl > 1.5) health.push('fluoride ' + fl.toFixed(2) + ' mg/L (WHO guideline 1.5)');
+    var m = /([0-9.]+)\s*km/.exec(L.source || '');
+    var dist = m ? parseFloat(m[1]) : null;
+    var n = lines.length;
+    var conf = 'Low';
+    if(dist !== null && dist < 5 && n >= 5) conf = 'High';
+    else if(dist !== null && dist < 20 && n >= 3) conf = 'Medium';
+    var w = (typeof calcWQI === 'function') ? calcWQI(p) : null;
+    var est = /Estimated|Climate|Blended/.test(L.source || '');
+    return {zip: L.zip, state: L.state, wqi: w, label: (w === null ? '' : getWQILabel(w)), dist: dist, known: n, lines: lines, health: health, conf: conf, est: est};
+}
+
+function bwActLetter(topic, name, area){
+    var I = bwActInfo();
+    var sign = ['Thank you,', name || '[Your name]', area || '[Your address or neighborhood]'].join('\n');
+    var out = [];
+    if(!I){
+        out = ['To the office responsible for local water and public health,', '', 'I live in [your ZIP code] and I would like to understand the quality of the water in my area.', '', 'I would like to ask:', '1. Where can I find the latest annual drinking water quality report for my address?', '2. What testing has been done recently, and are the results public?', '3. Who should I contact if I have a concern about my water?', '', sign];
+        return {subject: 'Request for my local drinking water quality report', body: out.join('\n')};
+    }
+    var place = 'ZIP ' + I.zip + ((I.state && I.state !== 'N/A') ? ', ' + I.state : '');
+    var concern = (topic === 'concern' && I.health.length > 0);
+    var subject = concern ? ('Concern about water quality values near ' + place) : ('Request for my local drinking water quality report, ' + place);
+    out.push('To the office responsible for water and public health in ' + place + ',');
+    out.push('');
+    if(concern){
+        out.push('I am writing about water quality near ' + place + '. Public monitoring data shows values above a health guideline: ' + I.health.join('; ') + '.');
+    } else {
+        out.push('I live in ' + place + ' and I would like to understand the quality of the water in my area.');
+    }
+    out.push('');
+    out.push('What I found using BlueWatch AI, an app that reads public EPA monitoring data:');
+    I.lines.forEach(function(l){ out.push(l); });
+    if(I.wqi !== null) out.push('- Overall water quality score: ' + I.wqi + ' (' + I.label + ')');
+    out.push('');
+    out.push('The nearest monitoring station ' + (I.dist !== null ? 'is about ' + I.dist.toFixed(0) + ' km away' : 'was used') + '. It may be a river, lake or well, not my tap, and the app is not a lab test. Confidence in this result is ' + I.conf.toLowerCase() + '.' + (I.est ? ' Some values are climate-based estimates, not measurements.' : ''));
+    out.push('');
+    out.push('I would like to ask:');
+    if(concern){
+        out.push('1. Has water in my area been tested for these recently, and can the results be published?');
+        out.push('2. If a problem is confirmed, how will residents be told?');
+        out.push('3. What can I do to protect my household in the meantime?');
+    } else {
+        out.push('1. Where can I find the latest annual drinking water quality report for my address?');
+        out.push('2. What testing has been done recently, and are the results public?');
+        out.push('3. Who should I contact if I have a concern about my water?');
+    }
+    out.push('');
+    out.push(sign);
+    return {subject: subject, body: out.join('\n')};
+}
+
+function bwActRefresh(){
+    var n = document.getElementById('bw-act-name');
+    var a = document.getElementById('bw-act-area');
+    bwActName = n ? n.value.trim() : '';
+    bwActArea = a ? a.value.trim() : '';
+    var L = bwActLetter(bwActTopic, bwActName, bwActArea);
+    var s = document.getElementById('bw-act-subject');
+    var t = document.getElementById('bw-act-text');
+    if(s) s.value = L.subject;
+    if(t) t.value = L.body;
+}
+
+function bwActTopicChange(v){
+    bwActTopic = v;
+    bwActRefresh();
+}
+
+function bwActMail(){
+    var s = document.getElementById('bw-act-subject').value;
+    var b = document.getElementById('bw-act-text').value;
+    window.location.href = 'mailto:?subject=' + encodeURIComponent(s) + '&body=' + encodeURIComponent(b);
+}
+
+function bwActCopy(){
+    var t = document.getElementById('bw-act-subject').value + '\n\n' + document.getElementById('bw-act-text').value;
+    function fallback(){
+        var ta = document.createElement('textarea');
+        ta.value = t;
+        document.body.appendChild(ta);
+        ta.select();
+        try { document.execCommand('copy'); alert('Copied to the clipboard'); } catch(e) { alert('Could not copy - select the text and copy it by hand'); }
+        document.body.removeChild(ta);
+    }
+    if(navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(t).then(function(){ alert('Copied to the clipboard'); }).catch(fallback);
+    } else {
+        fallback();
+    }
+}
+
+function bwActRender(){
+    var panel = document.getElementById('act-panel');
+    if(!panel) return;
+    var I = bwActInfo();
+    var canConcern = !!(I && I.health.length);
+    if(bwActTopic === 'concern' && !canConcern) bwActTopic = 'report';
+
+    var h = '<h2 style="font-size:18px;font-weight:700;margin-bottom:4px;">Take action</h2>' +
+        '<p style="font-size:13px;color:#555;margin-bottom:12px;line-height:1.5;">Turn what you found into a letter to the people who run your local water. It is filled in from your last search.</p>';
+
+    if(I){
+        h += '<div style="background:#e8f5e9;border-radius:10px;padding:10px;font-size:12px;margin-bottom:12px;">Using your last search: ZIP ' + I.zip + (I.wqi !== null ? ', score ' + I.wqi + ' (' + I.label + ')' : '') + ', confidence ' + I.conf.toLowerCase() + '.</div>';
+    } else {
+        h += '<div style="background:#fff8e1;border-radius:10px;padding:10px;font-size:12px;margin-bottom:12px;line-height:1.5;">Search a ZIP code on the map first, then come back and the letter fills in from your results. <button onclick="switchTab(\'map\')" style="margin-top:8px;display:block;padding:8px 14px;border:none;border-radius:8px;background:#4285F4;color:white;font-size:12px;cursor:pointer;">Go to the map</button></div>';
+    }
+
+    h += '<div style="background:white;border-radius:12px;padding:12px;margin-bottom:12px;">' +
+        '<div style="font-size:13px;font-weight:700;margin-bottom:8px;">What do you want to do?</div>' +
+        '<label style="display:block;font-size:13px;margin-bottom:6px;"><input type="radio" name="bwtopic" value="report"' + (bwActTopic === 'report' ? ' checked' : '') + ' onchange="bwActTopicChange(this.value)"> Ask for my water report and recent testing</label>';
+    if(canConcern){
+        h += '<label style="display:block;font-size:13px;margin-bottom:6px;"><input type="radio" name="bwtopic" value="concern"' + (bwActTopic === 'concern' ? ' checked' : '') + ' onchange="bwActTopicChange(this.value)"> Report a concern: some values are above a health guideline</label>';
+    }
+    h += '</div>';
+
+    h += '<div style="background:white;border-radius:12px;padding:12px;margin-bottom:12px;">' +
+        '<div style="font-size:13px;font-weight:700;margin-bottom:8px;">Your letter</div>' +
+        '<input id="bw-act-name" oninput="bwActRefresh()" placeholder="Your name" style="width:100%;padding:9px;border:1px solid #ddd;border-radius:8px;font-size:13px;margin-bottom:6px;">' +
+        '<input id="bw-act-area" oninput="bwActRefresh()" placeholder="Your address or neighborhood" style="width:100%;padding:9px;border:1px solid #ddd;border-radius:8px;font-size:13px;margin-bottom:6px;">' +
+        '<input id="bw-act-subject" style="width:100%;padding:9px;border:1px solid #ddd;border-radius:8px;font-size:13px;font-weight:600;margin-bottom:6px;">' +
+        '<textarea id="bw-act-text" style="width:100%;height:330px;padding:9px;border:1px solid #ddd;border-radius:8px;font-size:12px;line-height:1.5;resize:vertical;"></textarea>' +
+        '<div style="display:flex;gap:8px;margin-top:8px;">' +
+        '<button onclick="bwActMail()" style="flex:1;padding:11px;border:none;border-radius:8px;background:#4285F4;color:white;font-size:13px;font-weight:600;cursor:pointer;">Open in your email app</button>' +
+        '<button onclick="bwActCopy()" style="flex:1;padding:11px;border:none;border-radius:8px;background:#34a853;color:white;font-size:13px;font-weight:600;cursor:pointer;">Copy text</button></div>' +
+        '<div style="font-size:11px;color:#777;margin-top:8px;line-height:1.5;">Type your name and neighborhood first. If you edit the letter by hand and then change those boxes, the letter is rewritten.</div></div>';
+
+    var links = '<li><a href="https://www.usa.gov/elected-officials" target="_blank" rel="noopener">Find your elected officials (USAGov)</a></li>' +
+        '<li><a href="https://www.naccho.org/membership/lhd-directory" target="_blank" rel="noopener">Find your local health department (NACCHO directory)</a></li>' +
+        '<li><a href="https://www.epa.gov/ccr" target="_blank" rel="noopener">Find your drinking water report (EPA)</a></li>';
+    if(I && typeof bwStatePages !== 'undefined' && bwStatePages[I.state]){
+        links += '<li><a href="' + bwStatePages[I.state] + '" target="_blank" rel="noopener">Your state algal bloom advisories</a></li>';
+    }
+    h += '<div style="background:white;border-radius:12px;padding:12px;margin-bottom:12px;font-size:12px;line-height:1.6;">' +
+        '<div style="font-size:13px;font-weight:700;margin-bottom:4px;">Who to send it to</div>' +
+        '<ul style="margin:0;padding-left:18px;">' + links + '</ul>' +
+        '<div style="color:#777;font-size:11px;margin-top:6px;">The recipient is left blank on purpose. Addresses change, and a wrong one would send your message nowhere.</div></div>';
+
+    h += '<div style="background:white;border-radius:12px;padding:12px;margin-bottom:12px;font-size:12px;line-height:1.6;">' +
+        '<div style="font-size:13px;font-weight:700;margin-bottom:4px;">Before you send</div>' +
+        '<ul style="margin:0;padding-left:18px;"><li>Read your utility report first. It covers your actual tap.</li>' +
+        '<li>If a value was flagged, consider testing your own tap water.</li>' +
+        '<li>Check the numbers, edit the letter, and sign it yourself.</li></ul></div>';
+
+    panel.innerHTML = h;
+    var n = document.getElementById('bw-act-name');
+    var a = document.getElementById('bw-act-area');
+    if(n) n.value = bwActName;
+    if(a) a.value = bwActArea;
+    bwActRefresh();
+}
+
+var _bwOrigShowWQI3 = showWQI;
+showWQI = function(zip, p, source, state){
+    window.bwLast = {zip: zip, p: p, source: source, state: state};
+    _bwOrigShowWQI3(zip, p, source, state);
+};
+
+var _bwOrigSwitchTab = switchTab;
+switchTab = function(tab){
+    _bwOrigSwitchTab(tab);
+    if(tab === 'act') bwActRender();
 };
 
 function toggleWQI(){
