@@ -1398,6 +1398,21 @@ if(typeof Chart !== 'undefined' && Chart.defaults && Chart.defaults.font){
     Chart.defaults.font.size = 14;
 }
 
+
+function bwHideHeatRisk(p, source, state){
+    try {
+        var c = document.getElementById('wqi-content');
+        var spans = c.querySelectorAll('span');
+        for(var i = 0; i < spans.length; i++){
+            if(spans[i].textContent.indexOf('Heat Risk:') === 0 && spans[i].parentElement){
+                spans[i].parentElement.style.display = 'none';
+            }
+        }
+    } catch(e) {}
+    return '';
+}
+bwExtras.push(bwHideHeatRisk);
+
 function toggleWQI(){
     var p=document.getElementById('wqi-panel');
     p.style.display=p.style.display==='none'||p.style.display===''?'block':'none';
