@@ -109,6 +109,35 @@ body{font-family:-apple-system,Arial,sans-serif;overflow:hidden;}
 
 /* bw-act */
 #act-panel{bottom:70px !important;padding-bottom:24px !important;}
+
+/* bw-fonts */
+#wqi-panel [style*="font-size:9px"], #compare-panel [style*="font-size:9px"], #act-panel [style*="font-size:9px"], #about-panel [style*="font-size:9px"], #layer-drawer [style*="font-size:9px"], .leaflet-popup-content [style*="font-size:9px"]{font-size:11px !important;}
+#wqi-panel [style*="font-size:10px"], #compare-panel [style*="font-size:10px"], #act-panel [style*="font-size:10px"], #about-panel [style*="font-size:10px"], #layer-drawer [style*="font-size:10px"], .leaflet-popup-content [style*="font-size:10px"]{font-size:12px !important;}
+#wqi-panel [style*="font-size:11px"], #compare-panel [style*="font-size:11px"], #act-panel [style*="font-size:11px"], #about-panel [style*="font-size:11px"], #layer-drawer [style*="font-size:11px"], .leaflet-popup-content [style*="font-size:11px"]{font-size:13px !important;}
+#wqi-panel [style*="font-size:12px"], #compare-panel [style*="font-size:12px"], #act-panel [style*="font-size:12px"], #about-panel [style*="font-size:12px"], #layer-drawer [style*="font-size:12px"], .leaflet-popup-content [style*="font-size:12px"]{font-size:14px !important;}
+#wqi-panel [style*="font-size:13px"], #compare-panel [style*="font-size:13px"], #act-panel [style*="font-size:13px"], #about-panel [style*="font-size:13px"], #layer-drawer [style*="font-size:13px"], .leaflet-popup-content [style*="font-size:13px"]{font-size:15px !important;}
+#wqi-panel [style*="font-size:14px"], #compare-panel [style*="font-size:14px"], #act-panel [style*="font-size:14px"], #about-panel [style*="font-size:14px"], #layer-drawer [style*="font-size:14px"], .leaflet-popup-content [style*="font-size:14px"]{font-size:16px !important;}
+#zipInput{font-size:16px !important;}
+#compare-panel #zip1, #compare-panel #zip2{font-size:16px !important;}
+#act-panel #bw-act-name, #act-panel #bw-act-area, #act-panel #bw-act-subject, #act-panel #bw-act-text{font-size:16px !important;}
+.param-row{font-size:15px !important;}
+.source-badge{font-size:13px !important;}
+.wqi-badge{font-size:14px !important;}
+.layer-item{font-size:15px !important;padding:8px 0 !important;}
+#layer-drawer h3{font-size:15px !important;}
+.tab-btn{font-size:13px !important;}
+.tab-btn .tab-icon{font-size:24px !important;}
+#bw-bloom-banner{font-size:12px !important;}
+#legends .legend-item .label{font-size:14px !important;}
+#legends .grad-labels{font-size:12px !important;}
+@media (min-width:900px){
+  #btn-row button{font-size:14px !important;padding:10px 12px !important;}
+  #topbar{height:152px !important;}
+  #map{top:152px !important;}
+  #layer-drawer{top:152px !important;}
+  #wqi-panel{top:152px !important;}
+  #bw-bloom-banner{top:160px !important;}
+}
 </style>
 </head>
 <body>
@@ -1348,6 +1377,11 @@ switchTab = function(tab){
     _bwOrigSwitchTab(tab);
     if(tab === 'act') bwActRender();
 };
+
+
+if(typeof Chart !== 'undefined' && Chart.defaults && Chart.defaults.font){
+    Chart.defaults.font.size = 14;
+}
 
 function toggleWQI(){
     var p=document.getElementById('wqi-panel');
